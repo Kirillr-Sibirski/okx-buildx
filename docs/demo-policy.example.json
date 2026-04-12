@@ -1,0 +1,18 @@
+{
+  "defaults": {
+    "chain": "xlayer",
+    "policy": "strict"
+  },
+  "spenders": {
+    "0x779ded0c9e1022225f8e0630b35a9b54be713736": {
+      "label": "Live Demo Budget",
+      "trust": "trusted",
+      "maxAllowance": "50000",
+      "exactAllowance": "50000",
+      "notes": [
+        "Used for the live Build X demo flow.",
+        "Replace unlimited approval with an exact 0.05 USDT budget."
+      ]
+    }
+  }
+}
