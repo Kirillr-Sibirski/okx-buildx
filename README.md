@@ -143,5 +143,4 @@ Verified transactions:
 Required for submission:
 
 - `Kirill Sibirski`
-- Contact: `kirill.rybkov@outlook.com`
 - GitHub: `Kirillr-Sibirski`
