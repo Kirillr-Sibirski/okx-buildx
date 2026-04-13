@@ -1,9 +1,10 @@
-import { loadPolicyConfig } from "../lib/config.js";
+import { loadPolicyConfig, resolvePolicyPreset } from "../lib/config.js";
 import { writeExecutionArtifacts } from "../lib/audit.js";
 import { buildTxExplorerUrl } from "../lib/explorer.js";
+import { formatExecutionVerification, summarizeActionCounts, summarizeApprovals } from "../lib/format.js";
 import { executeRevokeFlow, fetchApprovals, resolveDefaultAddress } from "../lib/okx.js";
 import { buildPolicyDecisions } from "../lib/policy.js";
-import type { PolicyDecision, PolicyPreset } from "../types.js";
+import type { ExecutionVerification, PolicyDecision, PolicyPreset } from "../types.js";
 
 function isCleanupDecision(
   decision: PolicyDecision
@@ -14,17 +15,20 @@ function isCleanupDecision(
 export async function executeCommand(options: {
   address?: string;
   chain?: string;
-  policy: PolicyPreset;
+  policy?: PolicyPreset;
   config?: string;
   apply?: boolean;
   artifactDir?: string;
   format?: "pretty" | "json";
 }): Promise<void> {
   const { config, path: configPath } = await loadPolicyConfig(options.config);
+  const policy = resolvePolicyPreset(options.policy, config);
   const address = options.address ?? (await resolveDefaultAddress());
   const chain = options.chain ?? config?.defaults?.chain ?? "xlayer";
   const approvals = await fetchApprovals({ address, chain });
-  const decisions = buildPolicyDecisions(approvals, options.policy, config);
+  const decisions = buildPolicyDecisions(approvals, policy, config);
+  const beforeSummary = summarizeApprovals(approvals);
+  const beforeActions = summarizeActionCounts(decisions);
   const cleanupTargets = decisions
     .filter(isCleanupDecision)
     .map((decision) => ({
@@ -40,6 +44,35 @@ export async function executeCommand(options: {
     apply: Boolean(options.apply)
   });
 
+  let verification: ExecutionVerification | undefined;
+  if (options.apply && results.length) {
+    try {
+      const afterApprovals = await fetchApprovals({ address, chain });
+      const afterDecisions = buildPolicyDecisions(afterApprovals, policy, config);
+      const afterSummary = summarizeApprovals(afterApprovals);
+      const afterActions = summarizeActionCounts(afterDecisions);
+
+      verification = {
+        beforeSummary,
+        afterSummary,
+        beforeActionableCount: beforeActions.actionableCount,
+        afterActionableCount: afterActions.actionableCount,
+        beforeCleanupCount: beforeActions.cleanupCount,
+        afterCleanupCount: afterActions.cleanupCount,
+        beforeReviewCount: beforeActions.reviewCount,
+        afterReviewCount: afterActions.reviewCount
+      };
+    } catch (error) {
+      verification = {
+        beforeSummary,
+        beforeActionableCount: beforeActions.actionableCount,
+        beforeCleanupCount: beforeActions.cleanupCount,
+        beforeReviewCount: beforeActions.reviewCount,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+
   let artifactPath: string | undefined;
   if (options.apply && results.length) {
     const artifact = await writeExecutionArtifacts({
@@ -49,9 +82,10 @@ export async function executeCommand(options: {
         timestamp: new Date().toISOString(),
         walletAddress: address,
         chain,
-        policy: options.policy,
+        policy,
         configPath,
-        results
+        results,
+        verification
       }
     });
     artifactPath = artifact.artifactPath;
@@ -59,7 +93,11 @@ export async function executeCommand(options: {
 
   if (options.format === "json") {
     console.log(
-      JSON.stringify({ address, chain, apply: Boolean(options.apply), configPath, artifactPath, results }, null, 2)
+      JSON.stringify(
+        { address, chain, apply: Boolean(options.apply), configPath, artifactPath, results, verification },
+        null,
+        2
+      )
     );
     return;
   }
@@ -69,8 +107,13 @@ export async function executeCommand(options: {
     return;
   }
 
+  const successfulCount = results.filter((result) => Boolean(result.txHash)).length;
+  const blockedCount = results.filter((result) => result.scan.action === "block").length;
+  const failedCount = results.filter((result) => Boolean(result.error)).length;
+
+  console.log(`${options.apply ? "Applied" : "Prepared"} ${results.length} cleanup flow(s) for ${address}.`);
   console.log(
-    `${options.apply ? "Applied" : "Prepared"} ${results.length} cleanup flow(s) for ${address}.`
+    `Execution summary: ${successfulCount} submitted | ${blockedCount} blocked by tx-scan | ${failedCount} failed`
   );
   console.log("");
   if (artifactPath) {
@@ -112,6 +155,14 @@ export async function executeCommand(options: {
     }
     if (result.error) {
       console.log(`Error: ${result.error}`);
+    }
+    console.log("");
+  }
+
+  const verificationLines = formatExecutionVerification(verification);
+  if (verificationLines.length) {
+    for (const line of verificationLines) {
+      console.log(line);
     }
     console.log("");
   }

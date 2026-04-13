@@ -9,8 +9,10 @@ It turns raw `OnchainOS` approval and transaction-security primitives into a reu
 - enforce local spender budgets from a policy file
 - replace unlimited approvals with exact allowances
 - explain the next safest action in plain language
+- preflight remediation paths with `tx-scan` before live execution
 - emit markdown and JSON artifacts for auditability
 - log every live remediation run to a local audit trail
+- verify the post-run approval state after cleanup
 
 Built for the `OKX Build X Hackathon`, the project focuses on a practical agent-ops problem: agents can trade, bridge, and pay, but permissions often linger after execution. Approval hygiene should be part of the runtime, not an afterthought.
 
@@ -24,6 +26,12 @@ It helps agents and humans answer four practical questions:
 2. Which ones are unsafe, oversized, or out of policy?
 3. How should those approvals be reduced or revoked?
 4. Can we remediate them live and keep a clean audit trail?
+
+The operator loop is intentionally compact:
+
+- `assist` turns natural-language requests into the safest workflow
+- `review` combines approval state, top findings, and dry-run remediation preflight
+- `execute --apply` verifies the after-state so the operator can see what changed
 
 ## Project Positioning In The X Layer Ecosystem
 
@@ -56,8 +64,9 @@ Main execution loop:
 1. fetch approvals
 2. classify approvals under a policy preset and optional local config
 3. generate a health summary, plan, and report
-4. execute cleanup or exact-allowance replacement on X Layer
-5. write a machine-readable audit artifact
+4. preflight remediation safety with `tx-scan`
+5. execute cleanup or exact-allowance replacement on X Layer
+6. verify the post-run state and write a machine-readable audit artifact
 
 ```mermaid
 flowchart TD
@@ -117,7 +126,7 @@ The project now includes an agent-facing `assist` command that interprets natura
 
 When an OpenAI-compatible API key is configured, `assist` upgrades from heuristic routing to model-backed request interpretation. The `brief` command can also produce a model-backed operator briefing from live approval state.
 
-For operators who want one command instead of a multi-step workflow, `review` runs a complete approval review with top findings and the safest next command.
+For operators who want one command instead of a multi-step workflow, `review` runs a complete approval review with top findings, dry-run remediation preflight, and the safest next command. If no policy is provided, the tool falls back to the config default or `strict`.
 
 Examples:
 
@@ -126,7 +135,7 @@ npm run dev -- assist --input "Check my wallet health on X Layer"
 npm run dev -- assist --input "Generate a markdown report for my approvals" --output .okx-approval-firewall/demo-report.md
 npm run dev -- assist --input "Clean up risky approvals but keep trading routers active" --config okx-approval-firewall.policy.json
 npm run dev -- assist --input "Revoke anything unsafe now" --model gpt-4o-mini
-npm run dev -- review --policy strict --with-brief
+npm run dev -- review --with-brief
 npm run dev -- assist --input "Revoke anything unsafe now" --policy strict --apply
 npm run dev -- brief --policy strict --address 0xYourWallet
 ```
@@ -135,6 +144,7 @@ Why this matters for the product:
 
 - agents can issue natural-language safety requests instead of memorizing command combinations
 - the tool can use a model-backed interpretation layer when credentials are configured, with safe heuristic fallback when they are not
+- broader safety prompts now default to the richer `review` workflow instead of a thinner status-only summary
 - the tool explains the interpreted intent, chosen policy, safety mode, and next command
 - operators can generate a model-backed narrative briefing from the live approval state when an LLM endpoint is configured
 - live remediation still requires explicit `--apply`, so conversational control does not bypass execution safety
@@ -145,26 +155,26 @@ Why this matters for the product:
 The CLI includes:
 
 - `assist`: natural-language routing for approval inspection, planning, reporting, and cleanup
-- `review`: full approval review with top findings and the safest next command
+- `review`: full approval review with top findings, tx-scan preflight, and the safest next command
 - `brief`: optional model-backed operator briefing from live approval state
 - `status`: one-screen wallet health summary and next action
 - `inspect`: raw approval inventory for a wallet
 - `plan`: policy-driven decisions for each approval
 - `report`: markdown or JSON submission artifact
-- `execute`: live cleanup and exact-allowance remediation
-- `audit`: local execution history with artifact and tx references
+- `execute`: live cleanup, exact-allowance remediation, and post-run verification
+- `audit`: local execution history with artifact, verification delta, and tx references
 
 ## Working Mechanics
 
 The operational flow is:
 
-1. `review` gives the operator a complete high-signal pass
+1. `review` gives the operator a complete high-signal pass and previews cleanup safety
 2. `status` surfaces the current wallet approval health
 3. `inspect` shows raw exposure
 4. `plan` applies the chosen preset and local config
 5. `report` produces a shareable artifact
-6. `execute --apply` revokes unsafe approvals and optionally re-grants an exact budget
-7. `audit` shows the recorded local artifact and tx references
+6. `execute --apply` revokes unsafe approvals, optionally re-grants an exact budget, and verifies the resulting state
+7. `audit` shows the recorded local artifact, verification delta, and tx references
 
 CLI help:
 
@@ -215,7 +225,7 @@ npm run dev -- assist --input "Check my wallet health on X Layer"
 One-command review mode:
 
 ```bash
-npm run dev -- review --policy strict --with-brief
+npm run dev -- review --with-brief
 ```
 
 Model-backed briefing mode:
@@ -234,7 +244,7 @@ export APPROVAL_FIREWALL_LLM_MODEL=gpt-4o-mini
 Structured status check:
 
 ```bash
-npm run dev -- status --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json
+npm run dev -- status --address 0xYourWallet --config okx-approval-firewall.policy.json
 ```
 
 Inspect approvals:
@@ -246,7 +256,7 @@ npm run dev -- inspect --address 0xYourWallet --chain xlayer
 Generate a policy plan:
 
 ```bash
-npm run dev -- plan --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json
+npm run dev -- plan --address 0xYourWallet --config okx-approval-firewall.policy.json
 ```
 
 Write a markdown report artifact:

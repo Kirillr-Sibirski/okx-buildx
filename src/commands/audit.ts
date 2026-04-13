@@ -1,5 +1,6 @@
 import { readAuditLog } from "../lib/audit.js";
 import { buildTxExplorerUrl } from "../lib/explorer.js";
+import { formatExecutionVerification } from "../lib/format.js";
 
 export async function auditCommand(options: {
   artifactDir?: string;
@@ -48,6 +49,11 @@ export async function auditCommand(options: {
           console.log(`    Replacement explorer: ${replacementExplorerUrl}`);
         }
       }
+    }
+
+    const verificationLines = formatExecutionVerification(entry.verification);
+    for (const line of verificationLines) {
+      console.log(`  ${line}`);
     }
     console.log("");
   }

@@ -29,7 +29,7 @@ program
 program
   .command("review")
   .description("Run a complete approval review with top findings and the safest next command.")
-  .requiredOption("--policy <policy>", "Policy preset: strict, minimal, trading.", parsePolicy)
+  .option("--policy <policy>", "Policy preset: strict, minimal, trading. Defaults to config or strict.", parsePolicy)
   .option("--address <address>", "Wallet address. Falls back to the active Agentic Wallet EVM address.")
   .option("--chain <chain>", "Chain name or chain id to pass through to OnchainOS.")
   .option("--config <path>", "Optional path to a local policy config JSON file.")
@@ -45,7 +45,7 @@ program
 program
   .command("brief")
   .description("Generate a model-backed operator briefing from live approval state.")
-  .requiredOption("--policy <policy>", "Policy preset: strict, minimal, trading.", parsePolicy)
+  .option("--policy <policy>", "Policy preset: strict, minimal, trading. Defaults to config or strict.", parsePolicy)
   .option("--address <address>", "Wallet address. Falls back to the active Agentic Wallet EVM address.")
   .option("--chain <chain>", "Chain name or chain id to pass through to OnchainOS.")
   .option("--config <path>", "Optional path to a local policy config JSON file.")
@@ -76,7 +76,7 @@ program
 program
   .command("status")
   .description("Show a one-screen approval health summary for a wallet.")
-  .requiredOption("--policy <policy>", "Policy preset: strict, minimal, trading.", parsePolicy)
+  .option("--policy <policy>", "Policy preset: strict, minimal, trading. Defaults to config or strict.", parsePolicy)
   .option("--address <address>", "Wallet address. Falls back to the active Agentic Wallet EVM address.")
   .option("--chain <chain>", "Chain name or chain id to pass through to OnchainOS.")
   .option("--config <path>", "Optional path to a local policy config JSON file.")
@@ -99,7 +99,7 @@ program
 program
   .command("plan")
   .description("Generate policy-driven approval actions.")
-  .requiredOption("--policy <policy>", "Policy preset: strict, minimal, trading.", parsePolicy)
+  .option("--policy <policy>", "Policy preset: strict, minimal, trading. Defaults to config or strict.", parsePolicy)
   .option("--address <address>", "Wallet address. Falls back to the active Agentic Wallet EVM address.")
   .option("--chain <chain>", "Chain name or chain id to pass through to OnchainOS.")
   .option("--config <path>", "Optional path to a local policy config JSON file.")
@@ -111,7 +111,7 @@ program
 program
   .command("report")
   .description("Render a report from approvals and policy decisions.")
-  .requiredOption("--policy <policy>", "Policy preset: strict, minimal, trading.", parsePolicy)
+  .option("--policy <policy>", "Policy preset: strict, minimal, trading. Defaults to config or strict.", parsePolicy)
   .option("--address <address>", "Wallet address. Falls back to the active Agentic Wallet EVM address.")
   .option("--chain <chain>", "Chain name or chain id to pass through to OnchainOS.")
   .option("--config <path>", "Optional path to a local policy config JSON file.")
@@ -124,7 +124,7 @@ program
 program
   .command("execute")
   .description("Run cleanup flows for approvals marked for removal or reduction.")
-  .requiredOption("--policy <policy>", "Policy preset: strict, minimal, trading.", parsePolicy)
+  .option("--policy <policy>", "Policy preset: strict, minimal, trading. Defaults to config or strict.", parsePolicy)
   .option("--chain <chain>", "Chain name or chain id used for tx-scan and contract execution.")
   .option("--address <address>", "Wallet address. Falls back to the active Agentic Wallet EVM address.")
   .option("--config <path>", "Optional path to a local policy config JSON file.")

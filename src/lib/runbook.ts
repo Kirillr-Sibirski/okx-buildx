@@ -1,10 +1,21 @@
 import { buildWalletExplorerUrl } from "./explorer.js";
 
-import type { PolicyDecision, PolicyPreset } from "../types.js";
+import type { ExecuteResult, PolicyDecision, PolicyPreset } from "../types.js";
 
-type CommandIntent = "status" | "inspect" | "plan" | "report" | "execute";
+type CommandIntent = "review" | "status" | "inspect" | "plan" | "report" | "execute";
 
-export function recommendNextIntent(decisions: PolicyDecision[]): CommandIntent {
+export function recommendNextIntent(
+  decisions: PolicyDecision[],
+  preflightResults?: ExecuteResult[]
+): CommandIntent {
+  if (
+    preflightResults?.some(
+      (result) => result.scan.action === "block" || result.replacementScan?.action === "block"
+    )
+  ) {
+    return "report";
+  }
+
   if (decisions.some((decision) => decision.action === "revoke" || decision.action === "replace_with_exact_approval")) {
     return "execute";
   }

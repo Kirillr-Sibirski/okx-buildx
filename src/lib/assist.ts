@@ -2,7 +2,7 @@ import { createChatCompletion, hasLlmCredentials } from "./llm.js";
 
 import type { PolicyPreset } from "../types.js";
 
-export type AssistIntent = "status" | "inspect" | "plan" | "report" | "execute";
+export type AssistIntent = "review" | "status" | "inspect" | "plan" | "report" | "execute";
 
 export interface AssistInterpretation {
   request: string;
@@ -53,6 +53,22 @@ function detectIntent(input: string): {
   intent: AssistIntent;
   reason: string;
 } {
+  if (
+    includesAny(input, [
+      "review",
+      "walk me through",
+      "look over",
+      "wallet health",
+      "safety check",
+      "safety review"
+    ])
+  ) {
+    return {
+      intent: "review",
+      reason: "The request asks for a higher-signal safety review rather than a raw inventory."
+    };
+  }
+
   if (includesAny(input, ["report", "artifact", "markdown", "json report"])) {
     return {
       intent: "report",
@@ -93,6 +109,13 @@ function detectIntent(input: string): {
     };
   }
 
+  if (includesAny(input, ["status", "summary", "headline", "one-screen"])) {
+    return {
+      intent: "status",
+      reason: "The request asks for a compact status summary."
+    };
+  }
+
   if (
     includesAny(input, [
       "inspect",
@@ -109,8 +132,8 @@ function detectIntent(input: string): {
   }
 
   return {
-    intent: "status",
-    reason: "Defaulting to a wallet health summary because the request reads like a safety or status check."
+    intent: "review",
+    reason: "Defaulting to a full safety review because the request reads like an approval-health check."
   };
 }
 
@@ -171,7 +194,7 @@ export function buildAssistPrompt(request: string, fallbackPolicy: PolicyPreset)
     "Return strict JSON only.",
     "Schema:",
     "{",
-    '  "intent": "status | inspect | plan | report | execute",',
+    '  "intent": "review | status | inspect | plan | report | execute",',
     '  "policy": "strict | minimal | trading",',
     '  "chain": "xlayer | null",',
     '  "requestedApply": true,',
@@ -179,7 +202,8 @@ export function buildAssistPrompt(request: string, fallbackPolicy: PolicyPreset)
     "}",
     "",
     "Rules:",
-    "- Prefer status for general health checks.",
+    "- Prefer review for general health checks and higher-signal wallet safety requests.",
+    "- Prefer status only for compact one-screen summaries.",
     "- Prefer plan when the user asks what should happen next.",
     "- Prefer execute only when the user clearly asks to remediate or revoke.",
     "- Use chain=xlayer when the user references X Layer or chain 196.",
@@ -204,6 +228,7 @@ function parseModelInterpretation(
   };
 
   if (
+    parsed.intent !== "review" &&
     parsed.intent !== "status" &&
     parsed.intent !== "inspect" &&
     parsed.intent !== "plan" &&

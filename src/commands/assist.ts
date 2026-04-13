@@ -2,8 +2,10 @@ import { executeCommand } from "./execute.js";
 import { inspectCommand } from "./inspect.js";
 import { planCommand } from "./plan.js";
 import { reportCommand } from "./report.js";
+import { reviewCommand } from "./review.js";
 import { statusCommand } from "./status.js";
 import { resolveAssistInterpretation } from "../lib/assist.js";
+import { hasLlmCredentials } from "../lib/llm.js";
 import { buildRecommendedCommand } from "../lib/runbook.js";
 import type { PolicyPreset } from "../types.js";
 
@@ -29,6 +31,7 @@ export async function assistCommand(options: {
   const policy = options.policy ?? interpretation.policy;
   const chain = options.chain ?? interpretation.chain;
   const apply = Boolean(options.apply);
+  const withBrief = hasLlmCredentials(options.apiKey);
   const recommendedCommand = buildRecommendedCommand({
     intent: interpretation.intent,
     policy,
@@ -63,6 +66,21 @@ export async function assistCommand(options: {
       chain,
       policy,
       config: options.config,
+      format: "pretty"
+    });
+    return;
+  }
+
+  if (interpretation.intent === "review") {
+    await reviewCommand({
+      address: options.address,
+      chain,
+      policy,
+      config: options.config,
+      withBrief,
+      apiKey: options.apiKey,
+      baseUrl: options.baseUrl,
+      model: options.model,
       format: "pretty"
     });
     return;

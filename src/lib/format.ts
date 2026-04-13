@@ -1,6 +1,12 @@
 import { buildWalletExplorerUrl } from "./explorer.js";
 
-import type { ApprovalRecord, InspectionSummary, PolicyDecision } from "../types.js";
+import type {
+  ApprovalRecord,
+  ExecuteResult,
+  ExecutionVerification,
+  InspectionSummary,
+  PolicyDecision
+} from "../types.js";
 
 function displayAllowance(approval: ApprovalRecord): string {
   return approval.isUnlimited ? "unlimited" : approval.allowance;
@@ -82,6 +88,69 @@ export function summarizeApprovals(approvals: ApprovalRecord[]): InspectionSumma
     highRiskApprovals,
     mediumRiskApprovals,
     lowRiskApprovals
+  };
+}
+
+export function summarizeActionCounts(decisions: PolicyDecision[]): {
+  actionableCount: number;
+  cleanupCount: number;
+  reviewCount: number;
+} {
+  let cleanupCount = 0;
+  let reviewCount = 0;
+
+  for (const decision of decisions) {
+    if (decision.action === "revoke" || decision.action === "replace_with_exact_approval") {
+      cleanupCount += 1;
+      continue;
+    }
+
+    if (decision.action === "review") {
+      reviewCount += 1;
+    }
+  }
+
+  return {
+    actionableCount: cleanupCount + reviewCount,
+    cleanupCount,
+    reviewCount
+  };
+}
+
+function formatDelta(before: number, after: number): string {
+  const delta = after - before;
+  if (delta === 0) {
+    return `${before} -> ${after}`;
+  }
+
+  return `${before} -> ${after} (${delta > 0 ? "+" : ""}${delta})`;
+}
+
+function summarizePreflight(results: ExecuteResult[]): {
+  safeCount: number;
+  blockedCount: number;
+  replacementBlockedCount: number;
+} {
+  let safeCount = 0;
+  let blockedCount = 0;
+  let replacementBlockedCount = 0;
+
+  for (const result of results) {
+    if (result.scan.action === "block") {
+      blockedCount += 1;
+    } else {
+      safeCount += 1;
+    }
+
+    if (result.replacementScan?.action === "block") {
+      replacementBlockedCount += 1;
+    }
+  }
+
+  return {
+    safeCount,
+    blockedCount,
+    replacementBlockedCount
   };
 }
 
@@ -263,12 +332,16 @@ export function formatReview(params: {
   configPath?: string;
   approvals: ApprovalRecord[];
   decisions: PolicyDecision[];
+  preflight?: ExecuteResult[];
   recommendedCommand: string;
   brief?: string;
   briefError?: string;
 }): string {
   const summary = summarizeApprovals(params.approvals);
   const health = summarizeHealth(params.decisions);
+  const hasBlockedPreflight = params.preflight?.some(
+    (result) => result.scan.action === "block" || result.replacementScan?.action === "block"
+  );
   const findings = params.decisions.filter((decision) => decision.action !== "keep").slice(0, 3);
   const lines = [
     "OKX Approval Firewall Review",
@@ -278,7 +351,11 @@ export function formatReview(params: {
     `Risk grade: ${health.grade}`,
     `Headline: ${health.headline}`,
     `Approvals: ${summary.totalApprovals} total | ${summary.unlimitedApprovals} unlimited | ${summary.highRiskApprovals} high risk`,
-    `Next action: ${health.nextAction}`
+    `Next action: ${
+      hasBlockedPreflight
+        ? "One or more remediation paths are blocked by tx-scan. Review the report before live execution."
+        : health.nextAction
+    }`
   ];
 
   const walletExplorerUrl = buildWalletExplorerUrl(params.address, params.chain);
@@ -306,6 +383,35 @@ export function formatReview(params: {
     }
   }
 
+  if (params.preflight?.length) {
+    const preflightSummary = summarizePreflight(params.preflight);
+    lines.push(
+      "",
+      "Preflight remediation",
+      `  Safe cleanup paths: ${preflightSummary.safeCount}`,
+      `  Blocked cleanup paths: ${preflightSummary.blockedCount}`
+    );
+
+    if (preflightSummary.replacementBlockedCount > 0) {
+      lines.push(`  Blocked exact re-grants: ${preflightSummary.replacementBlockedCount}`);
+    }
+
+    for (const result of params.preflight.slice(0, 3)) {
+      lines.push(
+        `  ${result.plannedAction} ${result.approval.tokenSymbol || result.approval.tokenAddress}`,
+        `    Cleanup scan: ${result.scan.action || "safe"}`
+      );
+
+      if (result.replacementScan) {
+        lines.push(`    Replacement scan: ${result.replacementScan.action || "safe"}`);
+      }
+
+      if (result.followUp) {
+        lines.push(`    Follow-up: ${result.followUp}`);
+      }
+    }
+  }
+
   lines.push("", `Recommended command: ${params.recommendedCommand}`);
 
   if (params.brief) {
@@ -315,4 +421,43 @@ export function formatReview(params: {
   }
 
   return lines.join("\n");
+}
+
+export function formatExecutionVerification(verification?: ExecutionVerification): string[] {
+  if (!verification) {
+    return [];
+  }
+
+  const lines = ["Post-run verification"];
+
+  if (verification.error) {
+    lines.push(`  Verification unavailable: ${verification.error}`);
+    return lines;
+  }
+
+  if (!verification.afterSummary) {
+    lines.push("  Verification unavailable.");
+    return lines;
+  }
+
+  lines.push(
+    `  Unlimited approvals: ${formatDelta(
+      verification.beforeSummary.unlimitedApprovals,
+      verification.afterSummary.unlimitedApprovals
+    )}`,
+    `  High-risk approvals: ${formatDelta(
+      verification.beforeSummary.highRiskApprovals,
+      verification.afterSummary.highRiskApprovals
+    )}`,
+    `  Cleanup actions remaining: ${formatDelta(
+      verification.beforeCleanupCount,
+      verification.afterCleanupCount ?? verification.beforeCleanupCount
+    )}`,
+    `  Review actions remaining: ${formatDelta(
+      verification.beforeReviewCount,
+      verification.afterReviewCount ?? verification.beforeReviewCount
+    )}`
+  );
+
+  return lines;
 }

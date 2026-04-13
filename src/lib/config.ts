@@ -103,3 +103,10 @@ export function getSpenderPolicy(
 ): SpenderPolicy | undefined {
   return config?.spenders?.[normalizeAddress(spenderAddress)];
 }
+
+export function resolvePolicyPreset(
+  requestedPolicy: PolicyPreset | undefined,
+  config?: PolicyConfig
+): PolicyPreset {
+  return requestedPolicy ?? config?.defaults?.policy ?? "strict";
+}

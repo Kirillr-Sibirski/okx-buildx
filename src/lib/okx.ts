@@ -29,6 +29,36 @@ function unwrapData<T>(value: unknown): T {
   return value as T;
 }
 
+function extractOnchainOsError(value: unknown): string | undefined {
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "ok" in value &&
+    (value as { ok?: boolean }).ok === false &&
+    "error" in value &&
+    typeof (value as { error?: unknown }).error === "string"
+  ) {
+    return (value as { error: string }).error;
+  }
+
+  return undefined;
+}
+
+function parseJsonOutput(stdout: string, stderr: string, args: string[]): unknown {
+  const trimmed = stdout.trim();
+  if (!trimmed) {
+    throw new Error(`Command returned no JSON output: onchainos ${args.join(" ")}\n${stderr}`);
+  }
+
+  try {
+    return JSON.parse(trimmed);
+  } catch (error) {
+    throw new Error(
+      `Failed to parse JSON from onchainos ${args.join(" ")}\nSTDOUT:\n${stdout}\nSTDERR:\n${stderr}\n${String(error)}`
+    );
+  }
+}
+
 function normalizeChain(chain: string): string {
   const value = chain.trim().toLowerCase().replace(/[\s_]+/g, "");
   if (value === "xlayer" || value === "196") {
@@ -75,22 +105,39 @@ function parseUnlimitedFlag(record: Record<string, unknown>, allowance: string):
 }
 
 async function runJsonCommand(args: string[]): Promise<unknown> {
-  const { stdout, stderr } = await execFileAsync("onchainos", args, {
-    encoding: "utf8",
-    maxBuffer: 1024 * 1024 * 4
-  });
-
-  const trimmed = stdout.trim();
-  if (!trimmed) {
-    throw new Error(`Command returned no JSON output: onchainos ${args.join(" ")}\n${stderr}`);
-  }
-
   try {
-    return JSON.parse(trimmed);
+    const { stdout, stderr } = await execFileAsync("onchainos", args, {
+      encoding: "utf8",
+      maxBuffer: 1024 * 1024 * 4
+    });
+    const parsed = parseJsonOutput(stdout, stderr, args);
+    const commandError = extractOnchainOsError(parsed);
+    if (commandError) {
+      throw new Error(commandError);
+    }
+
+    return parsed;
   } catch (error) {
-    throw new Error(
-      `Failed to parse JSON from onchainos ${args.join(" ")}\nSTDOUT:\n${stdout}\nSTDERR:\n${stderr}\n${String(error)}`
-    );
+    const stdout =
+      typeof error === "object" && error !== null && "stdout" in error && typeof error.stdout === "string"
+        ? error.stdout
+        : "";
+    const stderr =
+      typeof error === "object" && error !== null && "stderr" in error && typeof error.stderr === "string"
+        ? error.stderr
+        : "";
+
+    if (stdout.trim()) {
+      const parsed = parseJsonOutput(stdout, stderr, args);
+      const commandError = extractOnchainOsError(parsed);
+      if (commandError) {
+        throw new Error(commandError);
+      }
+
+      return parsed;
+    }
+
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 

@@ -80,6 +80,18 @@ export interface ExecuteResult {
   error?: string;
 }
 
+export interface ExecutionVerification {
+  beforeSummary: InspectionSummary;
+  afterSummary?: InspectionSummary;
+  beforeActionableCount: number;
+  afterActionableCount?: number;
+  beforeCleanupCount: number;
+  afterCleanupCount?: number;
+  beforeReviewCount: number;
+  afterReviewCount?: number;
+  error?: string;
+}
+
 export interface AuditLogEntry {
   kind: "execute";
   timestamp: string;
@@ -89,4 +101,5 @@ export interface AuditLogEntry {
   configPath?: string;
   artifactPath?: string;
   results: ExecuteResult[];
+  verification?: ExecutionVerification;
 }

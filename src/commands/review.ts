@@ -1,15 +1,21 @@
-import { loadPolicyConfig } from "../lib/config.js";
+import { loadPolicyConfig, resolvePolicyPreset } from "../lib/config.js";
 import { formatReview } from "../lib/format.js";
 import { generateOperatorBrief } from "../lib/brief.js";
-import { fetchApprovals, resolveDefaultAddress } from "../lib/okx.js";
+import { executeRevokeFlow, fetchApprovals, resolveDefaultAddress } from "../lib/okx.js";
 import { buildPolicyDecisions } from "../lib/policy.js";
 import { buildRecommendedCommand, recommendNextIntent } from "../lib/runbook.js";
-import type { PolicyPreset } from "../types.js";
+import type { PolicyDecision, PolicyPreset } from "../types.js";
+
+function isCleanupDecision(
+  decision: PolicyDecision
+): decision is PolicyDecision & { action: "revoke" | "replace_with_exact_approval" } {
+  return decision.action === "revoke" || decision.action === "replace_with_exact_approval";
+}
 
 export async function reviewCommand(options: {
   address?: string;
   chain?: string;
-  policy: PolicyPreset;
+  policy?: PolicyPreset;
   config?: string;
   withBrief?: boolean;
   apiKey?: string;
@@ -18,14 +24,30 @@ export async function reviewCommand(options: {
   format?: "pretty" | "json";
 }): Promise<void> {
   const { config, path: configPath } = await loadPolicyConfig(options.config);
+  const policy = resolvePolicyPreset(options.policy, config);
   const address = options.address ?? (await resolveDefaultAddress());
   const chain = options.chain ?? config?.defaults?.chain;
   const approvals = await fetchApprovals({ address, chain });
-  const decisions = buildPolicyDecisions(approvals, options.policy, config);
-  const nextIntent = recommendNextIntent(decisions);
+  const decisions = buildPolicyDecisions(approvals, policy, config);
+  const cleanupTargets = decisions
+    .filter(isCleanupDecision)
+    .map((decision) => ({
+      approval: decision.approval,
+      plannedAction: decision.action,
+      replacementAllowance: decision.replacementAllowance
+    }));
+  const preflight = cleanupTargets.length
+    ? await executeRevokeFlow({
+        approvals: cleanupTargets,
+        chain: chain ?? "xlayer",
+        from: address,
+        apply: false
+      })
+    : [];
+  const nextIntent = recommendNextIntent(decisions, preflight);
   const recommendedCommand = buildRecommendedCommand({
     intent: nextIntent,
-    policy: options.policy,
+    policy,
     address,
     chain,
     config: configPath,
@@ -39,7 +61,7 @@ export async function reviewCommand(options: {
       brief = await generateOperatorBrief({
         address,
         chain,
-        policy: options.policy,
+        policy,
         approvals,
         decisions,
         apiKey: options.apiKey,
@@ -57,10 +79,11 @@ export async function reviewCommand(options: {
         {
           address,
           chain,
-          policy: options.policy,
+          policy,
           configPath,
           approvals,
           decisions,
+          preflight,
           recommendedCommand,
           brief,
           briefError
@@ -76,10 +99,11 @@ export async function reviewCommand(options: {
     formatReview({
       address,
       chain,
-      policy: options.policy,
+      policy,
       configPath,
       approvals,
       decisions,
+      preflight,
       recommendedCommand,
       brief,
       briefError

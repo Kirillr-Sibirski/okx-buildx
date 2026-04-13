@@ -1,4 +1,4 @@
-import { loadPolicyConfig } from "../lib/config.js";
+import { loadPolicyConfig, resolvePolicyPreset } from "../lib/config.js";
 import { formatStatus } from "../lib/format.js";
 import { fetchApprovals, resolveDefaultAddress } from "../lib/okx.js";
 import { buildPolicyDecisions } from "../lib/policy.js";
@@ -7,20 +7,19 @@ import type { PolicyPreset } from "../types.js";
 export async function statusCommand(options: {
   address?: string;
   chain?: string;
-  policy: PolicyPreset;
+  policy?: PolicyPreset;
   config?: string;
   format?: "pretty" | "json";
 }): Promise<void> {
   const { config, path: configPath } = await loadPolicyConfig(options.config);
+  const policy = resolvePolicyPreset(options.policy, config);
   const address = options.address ?? (await resolveDefaultAddress());
   const chain = options.chain ?? config?.defaults?.chain;
   const approvals = await fetchApprovals({ address, chain });
-  const decisions = buildPolicyDecisions(approvals, options.policy, config);
+  const decisions = buildPolicyDecisions(approvals, policy, config);
 
   if (options.format === "json") {
-    console.log(
-      JSON.stringify({ address, chain, policy: options.policy, configPath, approvals, decisions }, null, 2)
-    );
+    console.log(JSON.stringify({ address, chain, policy, configPath, approvals, decisions }, null, 2));
     return;
   }
 
@@ -28,7 +27,7 @@ export async function statusCommand(options: {
     formatStatus({
       address,
       chain,
-      policy: options.policy,
+      policy,
       approvals,
       decisions
     })
