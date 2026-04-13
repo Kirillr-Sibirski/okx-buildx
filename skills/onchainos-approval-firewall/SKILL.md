@@ -63,6 +63,27 @@ Example starter file:
 cp onchainos-approval-firewall.policy.example.json onchainos-approval-firewall.policy.json
 ```
 
+## Environment Notes
+
+For model-backed commands, create a `.env` file from `.env.example` and load it before running the CLI:
+
+```bash
+cp .env.example .env
+set -a
+source .env
+set +a
+```
+
+Supported variables:
+
+- `APPROVAL_FIREWALL_LLM_API_KEY`
+- `APPROVAL_FIREWALL_LLM_MODEL`
+- `APPROVAL_FIREWALL_LLM_BASE_URL`
+- or the equivalent `OPENAI_*` variables
+
+The normal live execution path does `not` require putting a private key or mnemonic in `.env`.
+This skill uses the active `Agentic Wallet` session through the real `onchainos` CLI.
+
 ## Intended Demo
 
 1. Run `doctor` for the guided first-pass safety check.

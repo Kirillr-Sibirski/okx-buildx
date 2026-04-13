@@ -99,6 +99,66 @@ npm run build
 cp onchainos-approval-firewall.policy.example.json onchainos-approval-firewall.policy.json
 ```
 
+## Environment Setup
+
+This project can run in two modes:
+
+- `read-only / policy mode`: inspect, review, plan, and report against a wallet address
+- `live execution mode`: use the active `Agentic Wallet` session to submit revokes or exact re-grants
+
+### What goes in `.env`
+
+Use a `.env` file for model-backed features like `brief`, `review --with-brief`, and `doctor --with-brief`.
+
+Starter file:
+
+```bash
+cp .env.example .env
+```
+
+Recommended variables:
+
+```bash
+APPROVAL_FIREWALL_LLM_API_KEY=your_openai_or_openai_compatible_api_key
+APPROVAL_FIREWALL_LLM_MODEL=gpt-4o-mini
+# optional
+# APPROVAL_FIREWALL_LLM_BASE_URL=https://api.openai.com/v1
+```
+
+You can also use:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
+Important: the CLI does not auto-load `.env` by itself. Load it into your shell first:
+
+```bash
+set -a
+source .env
+set +a
+```
+
+### Do we need the wallet private key in `.env`?
+
+No, not for the normal `OnchainOS + Agentic Wallet` flow.
+
+This project is designed to use the active `Agentic Wallet` session through the real `onchainos` CLI. That means:
+
+- you do `not` need to put a private key or mnemonic in `.env`
+- you do `not` need to export the wallet to use the core product
+- live execution works through `onchainos wallet ...` commands once the wallet session is authenticated
+
+What you do need for live execution:
+
+- a working `onchainos` installation
+- an authenticated `Agentic Wallet` session
+- funds on X Layer for gas and any tokens involved in the approval flow
+
+Only use a raw private key if you intentionally build a separate non-Agentic-Wallet signing path. The current project does not require that.
+
 Recommended first commands:
 
 ```bash
@@ -116,8 +176,9 @@ npm run dev -- execute --policy strict --config onchainos-approval-firewall.poli
 Model-backed briefing:
 
 ```bash
-export APPROVAL_FIREWALL_LLM_API_KEY=...
-export APPROVAL_FIREWALL_LLM_MODEL=gpt-4o-mini
+set -a
+source .env
+set +a
 npm run dev -- brief --policy strict --address 0xYourWallet
 ```
 
