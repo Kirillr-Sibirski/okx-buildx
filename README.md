@@ -142,5 +142,4 @@ Verified transactions:
 
 Required for submission:
 
-- `Kirill Sibirski`
-- GitHub: `Kirillr-Sibirski`
+- Solo submission by `Kirill Sibirski`, with help from `OpenAI Codex`
