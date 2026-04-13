@@ -89,7 +89,7 @@ This milestone is intentionally focused on the agent permission layer rather tha
 
 ## OnchainOS / Uniswap Skill Usage
 
-Current milestone: `OnchainOS-native`. No Uniswap integration is claimed in this version.
+This project is intentionally built around `OnchainOS` security primitives and `Agentic Wallet` execution. The approval-firewall use case does not require Uniswap integration to deliver its core safety value.
 
 ### OnchainOS modules used
 
@@ -176,10 +176,6 @@ Verified transactions:
 - exact regrant leg of exact remediation: `0x8e675c89d98ecf38ebe5525514c60d513d4cd173f569652b85919326c7d445cf`
 
 Tracked proof assets:
-
-- [proof/live-remediation-proof.md](./proof/live-remediation-proof.md)
-- [proof/live-remediation-proof.json](./proof/live-remediation-proof.json)
-- [proof/demo-report.md](./proof/demo-report.md)
 
 The successful exact-remediation run also produced a local audit artifact at:
 
@@ -312,7 +308,6 @@ Supported spender controls:
 - `README.md`: product overview, architecture, proof, and usage
 - `skills/okx-approval-firewall/SKILL.md`: reusable skill wrapper
 - `okx-approval-firewall.policy.example.json`: starter policy config
-- `proof/`: tracked judge-facing proof assets
 - `src/`: CLI commands, policy engine, OnchainOS integration, and audit logging
 - `test/`: parser and policy tests
 - `.github/workflows/ci.yml`: build and test verification
@@ -326,9 +321,9 @@ Key entrypoints:
 - `src/lib/policy.ts`
 - `src/lib/audit.ts`
 
-## Demo Story
+## Suggested Workflow
 
-The strongest live demo is:
+The strongest product walkthrough is:
 
 1. Run `assist` with a natural-language wallet safety request.
 2. Run `brief` to generate an operator-facing risk narrative.
@@ -337,12 +332,6 @@ The strongest live demo is:
 5. Run `report --output ...` to create a polished artifact.
 6. Run `execute --apply` to revoke the unlimited approval and regrant an exact budget.
 7. Run `audit` to show the recorded cleanup and tx hashes.
-8. End on the tracked proof files in `proof/`.
-
-Reusable demo assets:
-
-- [docs/demo-script.md](./docs/demo-script.md)
-- [docs/x-post-draft.md](./docs/x-post-draft.md)
 
 ## Team Members
 
