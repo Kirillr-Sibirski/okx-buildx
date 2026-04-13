@@ -84,12 +84,12 @@ The product includes:
 
 - `assist` for natural-language routing
 - `doctor` for the safest guided first-run flow
-- `brief` for model-backed operator summaries when an OpenAI-compatible API key is configured
 - `dashboard` for a visual review and execution surface on top of the same shared workflows
 
 Live execution still requires explicit confirmation or `--apply`.
 
 The important point is that this is not the trading agent itself. It is the approval-control layer an agent or operator uses before and after the wallet touches funds.
+The core reasoning is deterministic and local. Optional LLM summaries are not required for normal operation.
 
 ## Quickstart
 
@@ -108,7 +108,7 @@ This project can run in two modes:
 
 ### What goes in `.env`
 
-Use a `.env` file for model-backed features like `brief`, `review --with-brief`, and `doctor --with-brief`.
+Use a `.env` file only if you want optional model-backed summaries.
 
 Starter file:
 
@@ -164,7 +164,7 @@ Recommended first commands:
 ```bash
 npm run dev -- doctor
 npm run dev -- dashboard
-npm run dev -- review --with-brief
+npm run dev -- review
 ```
 
 Live cleanup:
@@ -173,7 +173,7 @@ Live cleanup:
 npm run dev -- execute --policy strict --config onchainos-approval-firewall.policy.json --apply
 ```
 
-Model-backed briefing:
+Optional model-backed summary:
 
 ```bash
 set -a

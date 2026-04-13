@@ -9,3 +9,5 @@ coverage/
 .permission-guard/
 .okx-approval-firewall/
 okx-approval-firewall.policy.json
+.onchainos-approval-firewall/
+onchainos-approval-firewall.policy.json
