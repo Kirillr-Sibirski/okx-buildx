@@ -15,7 +15,7 @@ async function createFakeOnchainos(approvals: Array<Record<string, unknown>>): P
   dir: string;
   statePath: string;
 }> {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "okx-approval-firewall-"));
+  const dir = await mkdtemp(path.join(os.tmpdir(), "onchainos-approval-firewall-"));
   const statePath = path.join(dir, "state.json");
   const scriptPath = path.join(dir, "onchainos");
 
@@ -104,7 +104,7 @@ test("review command shows preflight remediation guidance", async () => {
   try {
     const { stdout } = await runCli(["review", "--chain", "xlayer"], makeEnv(fake));
 
-    assert.match(stdout, /OKX Approval Firewall Review/);
+    assert.match(stdout, /onchainos-approval-firewall review/);
     assert.match(stdout, /Policy: strict/);
     assert.match(stdout, /Preflight remediation/);
     assert.match(stdout, /Cleanup scan: safe/);
@@ -131,7 +131,7 @@ test("execute command verifies the post-run state and audit replays it", async (
 
     const audit = await runCli(["audit", "--artifact-dir", artifactDir], makeEnv(fake));
 
-    assert.match(audit.stdout, /OKX Approval Firewall Audit/);
+    assert.match(audit.stdout, /onchainos-approval-firewall audit/);
     assert.match(audit.stdout, /Post-run verification/);
     assert.match(audit.stdout, /Unlimited approvals: 1 -> 0 \(-1\)/);
   } finally {

@@ -4,8 +4,8 @@ import path from "node:path";
 import type { PolicyConfig, PolicyPreset, SpenderPolicy } from "../types.js";
 
 const DEFAULT_CONFIG_PATHS = [
-  "okx-approval-firewall.policy.json",
-  ".okx-approval-firewall/policy.json"
+  "onchainos-approval-firewall.policy.json",
+  ".onchainos-approval-firewall/policy.json"
 ];
 
 function normalizeAddress(value: string): string {

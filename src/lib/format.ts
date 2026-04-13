@@ -157,7 +157,7 @@ function summarizePreflight(results: ExecuteResult[]): {
 export function formatInspection(approvals: ApprovalRecord[]): string {
   const summary = summarizeApprovals(approvals);
   const lines = [
-    "OKX Approval Firewall Inspection",
+    "onchainos-approval-firewall inspection",
     `Total approvals: ${summary.totalApprovals}`,
     `Unlimited approvals: ${summary.unlimitedApprovals}`,
     `High risk approvals: ${summary.highRiskApprovals}`,
@@ -186,7 +186,7 @@ export function formatInspection(approvals: ApprovalRecord[]): string {
 }
 
 export function formatPlan(decisions: PolicyDecision[]): string {
-  const lines = ["OKX Approval Firewall Plan", ""];
+  const lines = ["onchainos-approval-firewall plan", ""];
 
   if (!decisions.length) {
     lines.push("No policy actions are needed for the selected wallet or chain.", "");
@@ -228,7 +228,7 @@ export function formatMarkdownReport(
   const summary = summarizeApprovals(approvals);
   const health = summarizeHealth(decisions);
   const lines = [
-    "# OKX Approval Firewall Report",
+    "# onchainos-approval-firewall report",
     "",
     `Policy preset: \`${policy}\``,
     "",
@@ -293,7 +293,7 @@ export function formatStatus(params: {
   const health = summarizeHealth(params.decisions);
   const topDecision = params.decisions.find((decision) => decision.action !== "keep");
   const lines = [
-    "OKX Approval Firewall Status",
+    "onchainos-approval-firewall status",
     `Wallet: ${params.address}`,
     `Chain: ${params.chain ?? "all"}`,
     `Policy: ${params.policy}`,
@@ -344,7 +344,7 @@ export function formatReview(params: {
   );
   const findings = params.decisions.filter((decision) => decision.action !== "keep").slice(0, 3);
   const lines = [
-    "OKX Approval Firewall Review",
+    "onchainos-approval-firewall review",
     `Wallet: ${params.address}`,
     `Chain: ${params.chain ?? "all"}`,
     `Policy: ${params.policy}`,
@@ -480,7 +480,7 @@ export function formatDoctor(params: {
     (result) => result.scan.action === "block" || result.replacementScan?.action === "block"
   );
   const lines = [
-    "OKX Approval Firewall Doctor",
+    "onchainos-approval-firewall doctor",
     `Wallet: ${params.address}`,
     `Chain: ${params.chain ?? "all"}`,
     `Policy: ${params.policy}`,

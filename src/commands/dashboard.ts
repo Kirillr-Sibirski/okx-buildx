@@ -225,6 +225,6 @@ export async function dashboardCommand(options: {
     server.listen(port, host, () => resolve());
   });
 
-  console.log(`OKX Approval Firewall Dashboard running at http://${host}:${port}`);
+  console.log(`onchainos-approval-firewall dashboard running at http://${host}:${port}`);
   console.log("Wallet session is still required for live review and execution flows.");
 }

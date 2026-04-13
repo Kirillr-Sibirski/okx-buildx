@@ -3,7 +3,7 @@ import path from "node:path";
 
 import type { AuditLogEntry } from "../types.js";
 
-const DEFAULT_ARTIFACT_DIR = path.resolve(".okx-approval-firewall");
+const DEFAULT_ARTIFACT_DIR = path.resolve(".onchainos-approval-firewall");
 
 function timestampSlug(value: string): string {
   return value.replace(/[:.]/g, "-");

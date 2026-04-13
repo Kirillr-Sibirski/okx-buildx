@@ -17,13 +17,13 @@ export async function auditCommand(options: {
   }
 
   if (!sliced.length) {
-    console.log("OKX Approval Firewall Audit");
+    console.log("onchainos-approval-firewall audit");
     console.log("");
     console.log("No audit entries were found.");
     return;
   }
 
-  console.log("OKX Approval Firewall Audit");
+  console.log("onchainos-approval-firewall audit");
   console.log("");
 
   for (const entry of sliced) {

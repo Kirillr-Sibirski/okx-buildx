@@ -1,6 +1,6 @@
-# OKX Approval Firewall
+# onchainos-approval-firewall
 
-`OKX Approval Firewall` is the approval safety layer for agent wallets on `X Layer`.
+`onchainos-approval-firewall` is the approval safety layer for agent wallets on `X Layer`.
 
 You can think of it as `Revoke.cash for agents`, but built around `OnchainOS`, `Agentic Wallet`, policy-based approval control, preflight security checks, post-run verification, and auditability.
 
@@ -30,7 +30,7 @@ Core entrypoints:
 
 ## Project Positioning In The X Layer Ecosystem
 
-Most X Layer agent projects focus on action execution. `OKX Approval Firewall` focuses on the permission layer around those actions.
+Most X Layer agent projects focus on action execution. `onchainos-approval-firewall` focuses on the permission layer around those actions.
 
 It is designed for the X Layer ecosystem as:
 
@@ -96,7 +96,7 @@ The important point is that this is not the trading agent itself. It is the appr
 ```bash
 npm install
 npm run build
-cp okx-approval-firewall.policy.example.json okx-approval-firewall.policy.json
+cp onchainos-approval-firewall.policy.example.json onchainos-approval-firewall.policy.json
 ```
 
 Recommended first commands:
@@ -110,7 +110,7 @@ npm run dev -- review --with-brief
 Live cleanup:
 
 ```bash
-npm run dev -- execute --policy strict --config okx-approval-firewall.policy.json --apply
+npm run dev -- execute --policy strict --config onchainos-approval-firewall.policy.json --apply
 ```
 
 Model-backed briefing:

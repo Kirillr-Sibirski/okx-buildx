@@ -43,7 +43,7 @@ export async function assistCommand(options: {
     output: options.output
   });
 
-  console.log("OKX Approval Firewall Assist");
+  console.log("onchainos-approval-firewall assist");
   console.log(`Request: ${interpretation.request}`);
   console.log(`Interpreted intent: ${interpretation.intent}`);
   console.log(`Policy preset: ${policy}`);

@@ -1,14 +1,14 @@
 ---
-name: okx-approval-firewall
+name: onchainos-approval-firewall
 description: >
   Use this skill to inspect, score, and remediate ERC-20 approvals for an Agentic Wallet.
   Triggers: approval guard, allowance guard, approval firewall, spender budget, revoke approvals,
   exact approval replacement, stale approvals, risky spenders, approval audit.
 ---
 
-# OKX Approval Firewall
+# onchainos-approval-firewall
 
-OKX Approval Firewall is a reusable operator skill for X Layer agents.
+onchainos-approval-firewall is a reusable operator skill for X Layer agents.
 
 It is designed for agents that need to:
 
@@ -31,13 +31,13 @@ npm run dev -- dashboard
 npm run dev -- assist --input "Check my wallet health on X Layer"
 npm run dev -- assist --input "Revoke anything unsafe now" --model gpt-4o-mini
 npm run dev -- review --with-brief
-npm run dev -- assist --input "Clean up risky approvals but keep trading routers active" --config okx-approval-firewall.policy.json
+npm run dev -- assist --input "Clean up risky approvals but keep trading routers active" --config onchainos-approval-firewall.policy.json
 npm run dev -- brief --policy strict --address 0xYourWallet
-npm run dev -- status --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json
+npm run dev -- status --address 0xYourWallet --policy strict --config onchainos-approval-firewall.policy.json
 npm run dev -- inspect --address 0xYourWallet --chain xlayer
-npm run dev -- plan --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json
-npm run dev -- report --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json --output .okx-approval-firewall/report.md
-npm run dev -- execute --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json --apply
+npm run dev -- plan --address 0xYourWallet --policy strict --config onchainos-approval-firewall.policy.json
+npm run dev -- report --address 0xYourWallet --policy strict --config onchainos-approval-firewall.policy.json --output .onchainos-approval-firewall/report.md
+npm run dev -- execute --address 0xYourWallet --policy strict --config onchainos-approval-firewall.policy.json --apply
 npm run dev -- audit
 ```
 
@@ -60,7 +60,7 @@ Use a local JSON file to define spender-specific rules:
 Example starter file:
 
 ```bash
-cp okx-approval-firewall.policy.example.json okx-approval-firewall.policy.json
+cp onchainos-approval-firewall.policy.example.json onchainos-approval-firewall.policy.json
 ```
 
 ## Intended Demo
