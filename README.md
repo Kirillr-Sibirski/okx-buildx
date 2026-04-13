@@ -2,6 +2,8 @@
 
 `OKX Approval Firewall` is the approval safety layer for agent wallets on `X Layer`.
 
+You can think of it as `Revoke.cash for agents`, but built around `OnchainOS`, `Agentic Wallet`, policy-based approval control, preflight security checks, post-run verification, and auditability.
+
 It helps agents and operators:
 
 - inspect live ERC-20 approvals
@@ -16,12 +18,7 @@ Built for the `OKX Build X Hackathon`, the project focuses on a practical gap in
 
 This project is a CLI, local dashboard, and reusable skill for approval hygiene on X Layer.
 
-The simplest way to understand it is:
-
-- an agent wants to trade, route, or spend tokens
-- that requires ERC-20 approvals
-- those approvals can be too large, too old, or point at risky spenders
-- this project checks them, decides what should happen, and can clean them up safely
+An agent wants to trade, route, or spend tokens. That requires ERC-20 approvals. Those approvals can be too large, too old, or point at risky spenders. This project checks them, decides what should happen, and can clean them up safely.
 
 Core entrypoints:
 
@@ -53,14 +50,6 @@ Main workflow:
 3. preflight remediation with `OnchainOS security tx-scan`
 4. execute through `Agentic Wallet`
 5. verify the after-state and write a local audit artifact
-
-Key components:
-
-- `src/lib/okx.ts`: OnchainOS integration
-- `src/lib/policy.ts`: approval decision engine
-- `src/lib/workflows.ts`: shared review and execution workflows
-- `src/commands/`: CLI entrypoints
-- `dashboard/`: local operator UI
 
 ## Onchain Identity And Deployment Address
 
@@ -101,16 +90,6 @@ The product includes:
 Live execution still requires explicit confirmation or `--apply`.
 
 The important point is that this is not the trading agent itself. It is the approval-control layer an agent or operator uses before and after the wallet touches funds.
-
-## Working Mechanics
-
-Typical flow:
-
-1. run `doctor` or `assist`
-2. inspect the deeper result in `review` or `dashboard`
-3. run `execute --apply` if cleanup is needed
-4. confirm the after-state in the execution output
-5. inspect local history with `audit`
 
 ## Quickstart
 
@@ -159,14 +138,10 @@ Verified transactions:
 - cleanup leg of exact remediation: `0x4d32af6447c64bb6fc8cda31a2779a6f3912a7450401e7ff17c9281c18968fb4`
 - exact regrant leg of exact remediation: `0x8e675c89d98ecf38ebe5525514c60d513d4cd173f569652b85919326c7d445cf`
 
-Example local audit artifact:
-
-- `.okx-approval-firewall/runs/2026-04-12T16-47-55-954Z-execute.json`
-
 ## Team Members
 
-Solo submission:
+Required for submission:
 
-- `Kirill Sibirski` — product, engineering, agent operations, and live X Layer validation
+- `Kirill Sibirski`
 - Contact: `kirill.rybkov@outlook.com`
 - GitHub: `Kirillr-Sibirski`
