@@ -1,7 +1,7 @@
 {
   "name": "permission-guard",
   "version": "0.1.0",
-  "description": "Agent-native approval and allowance guard for the OKX Build X hackathon.",
+  "description": "Agent-native approval firewall for X Layer wallets built with OKX OnchainOS.",
   "type": "module",
   "bin": {
     "permission-guard": "./dist/cli.js"

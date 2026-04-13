@@ -11,6 +11,19 @@ It turns raw OKX OnchainOS approval primitives into a reusable operator tool tha
 - emit markdown and JSON artifacts for auditability
 - log every live remediation run to a local audit trail
 
+Built for the `OKX Build X Hackathon`, `PermissionGuard` focuses on a real agent pain point: permissions tend to accumulate after execution, but autonomous systems still need safe ways to keep operating.
+
+## Description
+
+PermissionGuard is a CLI and reusable skill for agent operators on X Layer.
+
+It helps agents and humans answer four practical questions:
+
+1. What approvals are active right now?
+2. Which ones are unsafe, oversized, or out of policy?
+3. How should those approvals be reduced or revoked?
+4. Can we remediate them live and keep a clean audit trail?
+
 ## Why it matters
 
 Most agents can trade, but very few can manage their permissions safely.
@@ -23,6 +36,35 @@ PermissionGuard is built for the missing agent-ops layer:
 - every cleanup should leave behind an artifact a human can review
 
 This is the core thesis for the OKX Build X Hackathon submission: `agents need a permission firewall, not just a revoke button`.
+
+## Architecture Overview
+
+PermissionGuard is intentionally simple and operator-first:
+
+- `OnchainOS security approvals` inventories current ERC-20 approval state
+- `OnchainOS security tx-scan` checks remediation transactions before execution
+- `Agentic Wallet` provides the execution context and signing path
+- local `policy-as-code` files define trusted, watchlisted, and blocked spenders
+- local audit artifacts preserve execution results for human review
+
+The main execution loop is:
+
+1. fetch approvals
+2. classify approvals under a policy preset and optional local config
+3. generate a health summary, plan, and report
+4. execute cleanup or exact-allowance replacement on X Layer
+5. write a machine-readable audit artifact
+
+## X Layer Identity
+
+- Primary Agentic Wallet:
+  `0x5b6a6bc856fba3e3ac9fe4e9368d2aa3090990c8`
+- Target chain:
+  `X Layer`
+- Custom deployed contracts:
+  `None in this version`
+
+This version is intentionally focused on the agent permission layer rather than a custom smart-contract protocol.
 
 ## Product Surface
 
@@ -146,6 +188,22 @@ Supported spender controls:
 - `exactAllowance` for exact regrant after cleanup
 - `notes` for operator context in plan and report output
 
+## Docs
+
+The repo is intentionally small:
+
+- `README.md`: product overview, setup, and demo story
+- `skills/permission-guard/SKILL.md`: reusable skill wrapper
+- `permission-guard.policy.example.json`: starter policy config
+- `src/`: CLI commands, policy engine, OKX integration, and audit logging
+
+Key entrypoints:
+
+- `src/cli.ts`
+- `src/lib/okx.ts`
+- `src/lib/policy.ts`
+- `src/lib/audit.ts`
+
 ## Demo Story
 
 The strongest live demo is:
@@ -162,3 +220,9 @@ The strongest live demo is:
 - Permit2 awareness is intentionally lightweight in this milestone.
 - Approval budget values are expected in raw token units for now.
 - Live execution uses `tx-scan` before contract calls and records the resulting artifact locally.
+
+## Team
+
+- Kirill Sibirski
+
+If you want, replace this section with your preferred public identity, role, and contact link before submission.
