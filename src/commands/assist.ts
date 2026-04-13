@@ -4,40 +4,8 @@ import { planCommand } from "./plan.js";
 import { reportCommand } from "./report.js";
 import { statusCommand } from "./status.js";
 import { resolveAssistInterpretation } from "../lib/assist.js";
+import { buildRecommendedCommand } from "../lib/runbook.js";
 import type { PolicyPreset } from "../types.js";
-
-function buildRecommendedCommand(params: {
-  intent: "status" | "inspect" | "plan" | "report" | "execute";
-  policy: PolicyPreset;
-  address?: string;
-  chain?: string;
-  config?: string;
-  apply?: boolean;
-  output?: string;
-}): string {
-  const args = ["npm", "run", "dev", "--", params.intent];
-
-  if (params.intent !== "inspect") {
-    args.push("--policy", params.policy);
-  }
-  if (params.address) {
-    args.push("--address", params.address);
-  }
-  if (params.chain) {
-    args.push("--chain", params.chain);
-  }
-  if (params.config) {
-    args.push("--config", params.config);
-  }
-  if (params.intent === "execute" && params.apply) {
-    args.push("--apply");
-  }
-  if (params.intent === "report" && params.output) {
-    args.push("--output", params.output);
-  }
-
-  return args.join(" ");
-}
 
 export async function assistCommand(options: {
   input: string;

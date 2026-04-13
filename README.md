@@ -117,6 +117,8 @@ The project now includes an agent-facing `assist` command that interprets natura
 
 When an OpenAI-compatible API key is configured, `assist` upgrades from heuristic routing to model-backed request interpretation. The `brief` command can also produce a model-backed operator briefing from live approval state.
 
+For operators who want one command instead of a multi-step workflow, `review` runs a complete approval review with top findings and the safest next command.
+
 Examples:
 
 ```bash
@@ -124,6 +126,7 @@ npm run dev -- assist --input "Check my wallet health on X Layer"
 npm run dev -- assist --input "Generate a markdown report for my approvals" --output .okx-approval-firewall/demo-report.md
 npm run dev -- assist --input "Clean up risky approvals but keep trading routers active" --config okx-approval-firewall.policy.json
 npm run dev -- assist --input "Revoke anything unsafe now" --model gpt-4o-mini
+npm run dev -- review --policy strict --with-brief
 npm run dev -- assist --input "Revoke anything unsafe now" --policy strict --apply
 npm run dev -- brief --policy strict --address 0xYourWallet
 ```
@@ -142,6 +145,7 @@ Why this matters for the product:
 The CLI includes:
 
 - `assist`: natural-language routing for approval inspection, planning, reporting, and cleanup
+- `review`: full approval review with top findings and the safest next command
 - `brief`: optional model-backed operator briefing from live approval state
 - `status`: one-screen wallet health summary and next action
 - `inspect`: raw approval inventory for a wallet
@@ -154,12 +158,13 @@ The CLI includes:
 
 The operational flow is:
 
-1. `status` surfaces the current wallet approval health
-2. `inspect` shows raw exposure
-3. `plan` applies the chosen preset and local config
-4. `report` produces a shareable artifact
-5. `execute --apply` revokes unsafe approvals and optionally re-grants an exact budget
-6. `audit` shows the recorded local artifact and tx references
+1. `review` gives the operator a complete high-signal pass
+2. `status` surfaces the current wallet approval health
+3. `inspect` shows raw exposure
+4. `plan` applies the chosen preset and local config
+5. `report` produces a shareable artifact
+6. `execute --apply` revokes unsafe approvals and optionally re-grants an exact budget
+7. `audit` shows the recorded local artifact and tx references
 
 CLI help:
 
@@ -205,6 +210,12 @@ Natural-language assistant mode:
 
 ```bash
 npm run dev -- assist --input "Check my wallet health on X Layer"
+```
+
+One-command review mode:
+
+```bash
+npm run dev -- review --policy strict --with-brief
 ```
 
 Model-backed briefing mode:

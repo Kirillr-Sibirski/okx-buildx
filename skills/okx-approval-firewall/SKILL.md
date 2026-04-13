@@ -13,6 +13,7 @@ OKX Approval Firewall is a reusable operator skill for X Layer agents.
 It is designed for agents that need to:
 
 - inspect approval health through natural-language requests
+- run a one-command approval review with top findings and the safest next step
 - generate model-backed operator briefings from approval state
 - review approval exposure before and after execution
 - apply local spender policy and budget rules
@@ -25,6 +26,7 @@ It is designed for agents that need to:
 ```bash
 npm run dev -- assist --input "Check my wallet health on X Layer"
 npm run dev -- assist --input "Revoke anything unsafe now" --model gpt-4o-mini
+npm run dev -- review --policy strict --with-brief
 npm run dev -- assist --input "Clean up risky approvals but keep trading routers active" --config okx-approval-firewall.policy.json
 npm run dev -- brief --policy strict --address 0xYourWallet
 npm run dev -- status --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json
@@ -60,12 +62,13 @@ cp okx-approval-firewall.policy.example.json okx-approval-firewall.policy.json
 ## Intended Demo
 
 1. Run `assist` with a natural-language safety request.
-2. Run `brief` to create a model-backed operator summary.
-3. Run `status` to show the wallet health summary.
-4. Run `plan` to show why the current approval state is acceptable or risky.
-5. Run `report --output ...` to create a shareable artifact.
-6. Run `execute --apply` to clean up or replace oversized approvals.
-7. Run `audit` to show the artifact path and resulting tx hashes.
+2. Run `review` to get the highest-signal operator view in one command.
+3. Run `brief` to create a model-backed operator summary.
+4. Run `status` to show the wallet health summary.
+5. Run `plan` to show why the current approval state is acceptable or risky.
+6. Run `report --output ...` to create a shareable artifact.
+7. Run `execute --apply` to clean up or replace oversized approvals.
+8. Run `audit` to show the artifact path and resulting tx hashes.
 
 ## Current Scope
 

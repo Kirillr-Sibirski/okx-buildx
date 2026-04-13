@@ -255,3 +255,64 @@ export function formatStatus(params: {
 
   return lines.join("\n");
 }
+
+export function formatReview(params: {
+  address: string;
+  chain?: string;
+  policy: string;
+  configPath?: string;
+  approvals: ApprovalRecord[];
+  decisions: PolicyDecision[];
+  recommendedCommand: string;
+  brief?: string;
+  briefError?: string;
+}): string {
+  const summary = summarizeApprovals(params.approvals);
+  const health = summarizeHealth(params.decisions);
+  const findings = params.decisions.filter((decision) => decision.action !== "keep").slice(0, 3);
+  const lines = [
+    "OKX Approval Firewall Review",
+    `Wallet: ${params.address}`,
+    `Chain: ${params.chain ?? "all"}`,
+    `Policy: ${params.policy}`,
+    `Risk grade: ${health.grade}`,
+    `Headline: ${health.headline}`,
+    `Approvals: ${summary.totalApprovals} total | ${summary.unlimitedApprovals} unlimited | ${summary.highRiskApprovals} high risk`,
+    `Next action: ${health.nextAction}`
+  ];
+
+  const walletExplorerUrl = buildWalletExplorerUrl(params.address, params.chain);
+  if (walletExplorerUrl) {
+    lines.push(`Wallet explorer: ${walletExplorerUrl}`);
+  }
+  if (params.configPath) {
+    lines.push(`Policy config: ${params.configPath}`);
+  }
+
+  lines.push("", "Top findings");
+
+  if (!findings.length) {
+    lines.push("  No actions beyond keep are currently required.");
+  } else {
+    for (const finding of findings) {
+      lines.push(
+        `  ${finding.action} [${finding.severity}] ${finding.approval.tokenSymbol || finding.approval.tokenAddress}`,
+        `    Spender: ${finding.approval.spenderAddress}`,
+        `    Reason: ${finding.reason}`
+      );
+      if (finding.replacementAllowance) {
+        lines.push(`    Replacement allowance: ${finding.replacementAllowance}`);
+      }
+    }
+  }
+
+  lines.push("", `Recommended command: ${params.recommendedCommand}`);
+
+  if (params.brief) {
+    lines.push("", "Operator brief", params.brief);
+  } else if (params.briefError) {
+    lines.push("", `Operator brief unavailable: ${params.briefError}`);
+  }
+
+  return lines.join("\n");
+}
