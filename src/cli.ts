@@ -49,6 +49,9 @@ program
   .option("--config <path>", "Optional path to a local policy config JSON file.")
   .option("--apply", "Actually submit revoke calls through Agentic Wallet when the request maps to execute.")
   .option("--output <path>", "Optional output path when the request maps to report.")
+  .option("--api-key <key>", "Optional API key override for an OpenAI-compatible chat-completions endpoint.")
+  .option("--base-url <url>", "Optional OpenAI-compatible API base URL.")
+  .option("--model <model>", "Optional model override.")
   .action(async (options) => {
     await assistCommand(options);
   });

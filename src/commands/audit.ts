@@ -1,4 +1,5 @@
 import { readAuditLog } from "../lib/audit.js";
+import { buildTxExplorerUrl } from "../lib/explorer.js";
 
 export async function auditCommand(options: {
   artifactDir?: string;
@@ -35,9 +36,17 @@ export async function auditCommand(options: {
       );
       if (result.txHash) {
         console.log(`    Cleanup tx: ${result.txHash}`);
+        const cleanupExplorerUrl = buildTxExplorerUrl(result.txHash, entry.chain);
+        if (cleanupExplorerUrl) {
+          console.log(`    Explorer: ${cleanupExplorerUrl}`);
+        }
       }
       if (result.replacementTxHash) {
         console.log(`    Replacement tx: ${result.replacementTxHash}`);
+        const replacementExplorerUrl = buildTxExplorerUrl(result.replacementTxHash, entry.chain);
+        if (replacementExplorerUrl) {
+          console.log(`    Replacement explorer: ${replacementExplorerUrl}`);
+        }
       }
     }
     console.log("");

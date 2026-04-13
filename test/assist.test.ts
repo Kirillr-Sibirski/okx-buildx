@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { interpretAssistRequest } from "../src/lib/assist.js";
+import { buildAssistPrompt, interpretAssistRequest } from "../src/lib/assist.js";
 
 test("assist defaults to status checks with strict policy", () => {
   const result = interpretAssistRequest("Check my wallet health on X Layer");
@@ -30,4 +30,17 @@ test("assist detects explicit live-apply language but does not force apply mode 
 
   assert.equal(result.intent, "execute");
   assert.equal(result.requestedApply, true);
+});
+
+test("assist heuristic interpretation marks its source", () => {
+  const result = interpretAssistRequest("show approvals");
+
+  assert.equal(result.source, "heuristic");
+});
+
+test("assist prompt asks for strict json output", () => {
+  const prompt = buildAssistPrompt("Check my wallet health", "strict");
+
+  assert.match(prompt, /Return strict JSON only/);
+  assert.match(prompt, /\"intent\": \"status \| inspect \| plan \| report \| execute\"/);
 });

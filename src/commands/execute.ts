@@ -1,5 +1,6 @@
 import { loadPolicyConfig } from "../lib/config.js";
 import { writeExecutionArtifacts } from "../lib/audit.js";
+import { buildTxExplorerUrl } from "../lib/explorer.js";
 import { executeRevokeFlow, fetchApprovals, resolveDefaultAddress } from "../lib/okx.js";
 import { buildPolicyDecisions } from "../lib/policy.js";
 import type { PolicyDecision, PolicyPreset } from "../types.js";
@@ -88,6 +89,10 @@ export async function executeCommand(options: {
     console.log(`Command: ${result.command.join(" ")}`);
     if (result.txHash) {
       console.log(`Tx hash: ${result.txHash}`);
+      const txExplorerUrl = buildTxExplorerUrl(result.txHash, chain);
+      if (txExplorerUrl) {
+        console.log(`Explorer: ${txExplorerUrl}`);
+      }
     }
     if (result.replacementCommand) {
       console.log(`Replacement command: ${result.replacementCommand.join(" ")}`);
@@ -97,6 +102,10 @@ export async function executeCommand(options: {
     }
     if (result.replacementTxHash) {
       console.log(`Replacement tx hash: ${result.replacementTxHash}`);
+      const replacementExplorerUrl = buildTxExplorerUrl(result.replacementTxHash, chain);
+      if (replacementExplorerUrl) {
+        console.log(`Replacement explorer: ${replacementExplorerUrl}`);
+      }
     }
     if (result.followUp) {
       console.log(`Follow-up: ${result.followUp}`);

@@ -24,6 +24,7 @@ It is designed for agents that need to:
 
 ```bash
 npm run dev -- assist --input "Check my wallet health on X Layer"
+npm run dev -- assist --input "Revoke anything unsafe now" --model gpt-4o-mini
 npm run dev -- assist --input "Clean up risky approvals but keep trading routers active" --config okx-approval-firewall.policy.json
 npm run dev -- brief --policy strict --address 0xYourWallet
 npm run dev -- status --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json

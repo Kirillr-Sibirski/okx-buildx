@@ -1,3 +1,5 @@
+import { buildWalletExplorerUrl } from "./explorer.js";
+
 import type { ApprovalRecord, InspectionSummary, PolicyDecision } from "../types.js";
 
 function displayAllowance(approval: ApprovalRecord): string {
@@ -232,6 +234,11 @@ export function formatStatus(params: {
     `Next action: ${health.nextAction}`,
     ""
   ];
+
+  const walletExplorerUrl = buildWalletExplorerUrl(params.address, params.chain);
+  if (walletExplorerUrl) {
+    lines.push(`Wallet explorer: ${walletExplorerUrl}`, "");
+  }
 
   if (topDecision) {
     lines.push(

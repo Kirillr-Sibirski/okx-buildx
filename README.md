@@ -115,14 +115,15 @@ This project is intentionally built around `OnchainOS` security primitives and `
 
 The project now includes an agent-facing `assist` command that interprets natural-language operator requests and routes them to the safest matching workflow.
 
-It also includes an optional `brief` command that can produce a model-backed operator briefing through an OpenAI-compatible API when credentials are configured.
+When an OpenAI-compatible API key is configured, `assist` upgrades from heuristic routing to model-backed request interpretation. The `brief` command can also produce a model-backed operator briefing from live approval state.
 
 Examples:
 
 ```bash
 npm run dev -- assist --input "Check my wallet health on X Layer"
-npm run dev -- assist --input "Generate a markdown report for my approvals" --output proof/demo-report.md
+npm run dev -- assist --input "Generate a markdown report for my approvals" --output .okx-approval-firewall/demo-report.md
 npm run dev -- assist --input "Clean up risky approvals but keep trading routers active" --config okx-approval-firewall.policy.json
+npm run dev -- assist --input "Revoke anything unsafe now" --model gpt-4o-mini
 npm run dev -- assist --input "Revoke anything unsafe now" --policy strict --apply
 npm run dev -- brief --policy strict --address 0xYourWallet
 ```
@@ -130,9 +131,11 @@ npm run dev -- brief --policy strict --address 0xYourWallet
 Why this matters for the product:
 
 - agents can issue natural-language safety requests instead of memorizing command combinations
+- the tool can use a model-backed interpretation layer when credentials are configured, with safe heuristic fallback when they are not
 - the tool explains the interpreted intent, chosen policy, safety mode, and next command
 - operators can generate a model-backed narrative briefing from the live approval state when an LLM endpoint is configured
 - live remediation still requires explicit `--apply`, so conversational control does not bypass execution safety
+- wallet and transaction outputs surface direct `OKX Explorer` links for X Layer where applicable
 
 ## Product Surface
 
@@ -175,8 +178,6 @@ Verified transactions:
 - cleanup leg of exact remediation: `0x4d32af6447c64bb6fc8cda31a2779a6f3912a7450401e7ff17c9281c18968fb4`
 - exact regrant leg of exact remediation: `0x8e675c89d98ecf38ebe5525514c60d513d4cd173f569652b85919326c7d445cf`
 
-Tracked proof assets:
-
 The successful exact-remediation run also produced a local audit artifact at:
 
 - `.okx-approval-firewall/runs/2026-04-12T16-47-55-954Z-execute.json`
@@ -212,7 +213,7 @@ Model-backed briefing mode:
 npm run dev -- brief --policy strict --address 0xYourWallet
 ```
 
-Environment variables for `brief`:
+Environment variables for model-backed `assist` and `brief`:
 
 ```bash
 export APPROVAL_FIREWALL_LLM_API_KEY=...

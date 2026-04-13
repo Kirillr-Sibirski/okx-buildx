@@ -3,7 +3,7 @@ import { inspectCommand } from "./inspect.js";
 import { planCommand } from "./plan.js";
 import { reportCommand } from "./report.js";
 import { statusCommand } from "./status.js";
-import { interpretAssistRequest } from "../lib/assist.js";
+import { resolveAssistInterpretation } from "../lib/assist.js";
 import type { PolicyPreset } from "../types.js";
 
 function buildRecommendedCommand(params: {
@@ -47,8 +47,17 @@ export async function assistCommand(options: {
   config?: string;
   apply?: boolean;
   output?: string;
+  apiKey?: string;
+  baseUrl?: string;
+  model?: string;
 }): Promise<void> {
-  const interpretation = interpretAssistRequest(options.input, options.policy ?? "strict");
+  const interpretation = await resolveAssistInterpretation({
+    request: options.input,
+    fallbackPolicy: options.policy ?? "strict",
+    apiKey: options.apiKey,
+    baseUrl: options.baseUrl,
+    model: options.model
+  });
   const policy = options.policy ?? interpretation.policy;
   const chain = options.chain ?? interpretation.chain;
   const apply = Boolean(options.apply);
@@ -68,6 +77,7 @@ export async function assistCommand(options: {
   console.log(`Policy preset: ${policy}`);
   console.log(`Chain: ${chain ?? "default"}`);
   console.log(`Safety mode: ${apply ? "live apply enabled" : "dry run only"}`);
+  console.log(`Interpretation source: ${interpretation.source}`);
   console.log(`Why: ${interpretation.rationale}`);
   console.log(`Recommended command: ${recommendedCommand}`);
   console.log("");
