@@ -2,7 +2,7 @@ import { createChatCompletion, hasLlmCredentials } from "./llm.js";
 
 import type { PolicyPreset } from "../types.js";
 
-export type AssistIntent = "review" | "status" | "inspect" | "plan" | "report" | "execute";
+export type AssistIntent = "doctor" | "review" | "status" | "inspect" | "plan" | "report" | "execute";
 
 export interface AssistInterpretation {
   request: string;
@@ -55,10 +55,23 @@ function detectIntent(input: string): {
 } {
   if (
     includesAny(input, [
+      "doctor",
+      "guided check",
+      "start here",
+      "what should i do first"
+    ])
+  ) {
+    return {
+      intent: "doctor",
+      reason: "The request asks for a guided starting point."
+    };
+  }
+
+  if (
+    includesAny(input, [
       "review",
       "walk me through",
       "look over",
-      "wallet health",
       "safety check",
       "safety review"
     ])
@@ -132,8 +145,8 @@ function detectIntent(input: string): {
   }
 
   return {
-    intent: "review",
-    reason: "Defaulting to a full safety review because the request reads like an approval-health check."
+    intent: "doctor",
+    reason: "Defaulting to the guided doctor flow because the request reads like a first-pass approval-health check."
   };
 }
 
@@ -194,7 +207,7 @@ export function buildAssistPrompt(request: string, fallbackPolicy: PolicyPreset)
     "Return strict JSON only.",
     "Schema:",
     "{",
-    '  "intent": "review | status | inspect | plan | report | execute",',
+    '  "intent": "doctor | review | status | inspect | plan | report | execute",',
     '  "policy": "strict | minimal | trading",',
     '  "chain": "xlayer | null",',
     '  "requestedApply": true,',
@@ -202,7 +215,8 @@ export function buildAssistPrompt(request: string, fallbackPolicy: PolicyPreset)
     "}",
     "",
     "Rules:",
-    "- Prefer review for general health checks and higher-signal wallet safety requests.",
+    "- Prefer doctor for general health checks and first-pass safety requests.",
+    "- Prefer review when the user explicitly asks for a deeper review or walkthrough.",
     "- Prefer status only for compact one-screen summaries.",
     "- Prefer plan when the user asks what should happen next.",
     "- Prefer execute only when the user clearly asks to remediate or revoke.",
@@ -228,6 +242,7 @@ function parseModelInterpretation(
   };
 
   if (
+    parsed.intent !== "doctor" &&
     parsed.intent !== "review" &&
     parsed.intent !== "status" &&
     parsed.intent !== "inspect" &&

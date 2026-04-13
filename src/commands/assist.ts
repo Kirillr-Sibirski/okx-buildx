@@ -2,6 +2,7 @@ import { executeCommand } from "./execute.js";
 import { inspectCommand } from "./inspect.js";
 import { planCommand } from "./plan.js";
 import { reportCommand } from "./report.js";
+import { doctorCommand } from "./doctor.js";
 import { reviewCommand } from "./review.js";
 import { statusCommand } from "./status.js";
 import { resolveAssistInterpretation } from "../lib/assist.js";
@@ -66,6 +67,21 @@ export async function assistCommand(options: {
       chain,
       policy,
       config: options.config,
+      format: "pretty"
+    });
+    return;
+  }
+
+  if (interpretation.intent === "doctor") {
+    await doctorCommand({
+      address: options.address,
+      chain,
+      policy,
+      config: options.config,
+      withBrief,
+      apiKey: options.apiKey,
+      baseUrl: options.baseUrl,
+      model: options.model,
       format: "pretty"
     });
     return;

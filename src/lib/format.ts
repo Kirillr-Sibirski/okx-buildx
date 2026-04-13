@@ -461,3 +461,74 @@ export function formatExecutionVerification(verification?: ExecutionVerification
 
   return lines;
 }
+
+export function formatDoctor(params: {
+  address: string;
+  chain?: string;
+  policy: string;
+  approvals: ApprovalRecord[];
+  decisions: PolicyDecision[];
+  preflight?: ExecuteResult[];
+  recommendedCommand: string;
+  brief?: string;
+  briefError?: string;
+}): string {
+  const summary = summarizeApprovals(params.approvals);
+  const health = summarizeHealth(params.decisions);
+  const topFinding = params.decisions.find((decision) => decision.action !== "keep");
+  const blockedPreflight = params.preflight?.some(
+    (result) => result.scan.action === "block" || result.replacementScan?.action === "block"
+  );
+  const lines = [
+    "OKX Approval Firewall Doctor",
+    `Wallet: ${params.address}`,
+    `Chain: ${params.chain ?? "all"}`,
+    `Policy: ${params.policy}`,
+    `Risk grade: ${health.grade}`,
+    `Headline: ${health.headline}`,
+    `Approvals: ${summary.totalApprovals} total | ${summary.unlimitedApprovals} unlimited | ${summary.highRiskApprovals} high risk`,
+    `Immediate next step: ${
+      blockedPreflight
+        ? "Review the blocked remediation path before live execution."
+        : params.recommendedCommand
+    }`,
+    ""
+  ];
+
+  const walletExplorerUrl = buildWalletExplorerUrl(params.address, params.chain);
+  if (walletExplorerUrl) {
+    lines.push(`Wallet explorer: ${walletExplorerUrl}`, "");
+  }
+
+  if (topFinding) {
+    lines.push(
+      "Primary finding",
+      `  ${topFinding.action} ${topFinding.approval.tokenSymbol || topFinding.approval.tokenAddress}`,
+      `  Why: ${topFinding.reason}`
+    );
+    if (topFinding.replacementAllowance) {
+      lines.push(`  Exact allowance: ${topFinding.replacementAllowance}`);
+    }
+    lines.push("");
+  } else {
+    lines.push("Primary finding", "  Nothing needs action right now.", "");
+  }
+
+  if (params.preflight?.length) {
+    const preflightSummary = summarizePreflight(params.preflight);
+    lines.push(
+      "Preflight",
+      `  Safe cleanup paths: ${preflightSummary.safeCount}`,
+      `  Blocked cleanup paths: ${preflightSummary.blockedCount}`,
+      ""
+    );
+  }
+
+  if (params.brief) {
+    lines.push("Operator brief", params.brief);
+  } else if (params.briefError) {
+    lines.push(`Operator brief unavailable: ${params.briefError}`);
+  }
+
+  return lines.join("\n");
+}

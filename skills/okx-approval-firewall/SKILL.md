@@ -12,6 +12,7 @@ OKX Approval Firewall is a reusable operator skill for X Layer agents.
 
 It is designed for agents that need to:
 
+- start with a guided approval-health check
 - run the firewall from a lightweight local dashboard
 - inspect approval health through natural-language requests
 - run a one-command approval review with top findings, tx-scan preflight, and the safest next step
@@ -25,6 +26,7 @@ It is designed for agents that need to:
 ## Command Surface
 
 ```bash
+npm run dev -- doctor
 npm run dev -- dashboard
 npm run dev -- assist --input "Check my wallet health on X Layer"
 npm run dev -- assist --input "Revoke anything unsafe now" --model gpt-4o-mini
@@ -63,15 +65,16 @@ cp okx-approval-firewall.policy.example.json okx-approval-firewall.policy.json
 
 ## Intended Demo
 
-1. Run `assist` with a natural-language safety request.
-2. Run `dashboard` to inspect the same review loop in a visual operator surface.
-3. Run `review` to get the highest-signal operator view and dry-run remediation preview in one command.
-4. Run `brief` to create a model-backed operator summary.
-5. Run `status` to show the wallet health summary.
-6. Run `plan` to show why the current approval state is acceptable or risky.
-7. Run `report --output ...` to create a shareable artifact.
-8. Run `execute --apply` to clean up or replace oversized approvals and verify the after-state.
-9. Run `audit` to show the artifact path, verification delta, and resulting tx hashes.
+1. Run `doctor` for the guided first-pass safety check.
+2. Run `assist` with a natural-language safety request.
+3. Run `dashboard` to inspect the same review loop in a visual operator surface.
+4. Run `review` to get the highest-signal operator view and dry-run remediation preview in one command.
+5. Run `brief` to create a model-backed operator summary.
+6. Run `status` to show the wallet health summary.
+7. Run `plan` to show why the current approval state is acceptable or risky.
+8. Run `report --output ...` to create a shareable artifact.
+9. Run `execute --apply` to clean up or replace oversized approvals and verify the after-state.
+10. Run `audit` to show the artifact path, verification delta, and resulting tx hashes.
 
 ## Current Scope
 

@@ -2,7 +2,7 @@ import { buildWalletExplorerUrl } from "./explorer.js";
 
 import type { ExecuteResult, PolicyDecision, PolicyPreset } from "../types.js";
 
-type CommandIntent = "review" | "status" | "inspect" | "plan" | "report" | "execute";
+type CommandIntent = "doctor" | "review" | "status" | "inspect" | "plan" | "report" | "execute";
 
 export function recommendNextIntent(
   decisions: PolicyDecision[],

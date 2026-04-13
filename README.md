@@ -30,7 +30,8 @@ It helps agents and humans answer four practical questions:
 
 The operator loop is intentionally compact:
 
-- `assist` turns natural-language requests into the safest workflow
+- `doctor` is the guided first-run entrypoint with one recommended next step
+- `assist` turns natural-language requests into the safest workflow and now defaults broad safety checks into `doctor`
 - `dashboard` gives the operator a visual control room with live X Layer review cards
 - `review` combines approval state, top findings, and dry-run remediation preflight
 - `execute --apply` verifies the after-state so the operator can see what changed
@@ -136,6 +137,7 @@ Examples:
 
 ```bash
 npm run dev -- assist --input "Check my wallet health on X Layer"
+npm run dev -- doctor
 npm run dev -- dashboard
 npm run dev -- assist --input "Generate a markdown report for my approvals" --output .okx-approval-firewall/demo-report.md
 npm run dev -- assist --input "Clean up risky approvals but keep trading routers active" --config okx-approval-firewall.policy.json
@@ -160,6 +162,7 @@ Why this matters for the product:
 
 The CLI includes:
 
+- `doctor`: guided approval-health check with one recommended next step
 - `dashboard`: local visual control room for review, brief, and live execution
 - `assist`: natural-language routing for approval inspection, planning, reporting, and cleanup
 - `review`: full approval review with top findings, tx-scan preflight, and the safest next command
@@ -175,14 +178,15 @@ The CLI includes:
 
 The operational flow is:
 
-1. `review` gives the operator a complete high-signal pass and previews cleanup safety
-2. `dashboard` turns that same review flow into a visual operator surface
-3. `status` surfaces the current wallet approval health
-4. `inspect` shows raw exposure
-5. `plan` applies the chosen preset and local config
-6. `report` produces a shareable artifact
-7. `execute --apply` revokes unsafe approvals, optionally re-grants an exact budget, and verifies the resulting state
-8. `audit` shows the recorded local artifact, verification delta, and tx references
+1. `doctor` gives the operator a guided first pass and one concrete next step
+2. `review` gives the operator a complete high-signal pass and previews cleanup safety
+3. `dashboard` turns that same review flow into a visual operator surface
+4. `status` surfaces the current wallet approval health
+5. `inspect` shows raw exposure
+6. `plan` applies the chosen preset and local config
+7. `report` produces a shareable artifact
+8. `execute --apply` revokes unsafe approvals, optionally re-grants an exact budget, and verifies the resulting state
+9. `audit` shows the recorded local artifact, verification delta, and tx references
 
 CLI help:
 
@@ -222,6 +226,12 @@ Use the sample policy file as a starting point:
 
 ```bash
 cp okx-approval-firewall.policy.example.json okx-approval-firewall.policy.json
+```
+
+Guided first-run check:
+
+```bash
+npm run dev -- doctor
 ```
 
 Natural-language assistant mode:

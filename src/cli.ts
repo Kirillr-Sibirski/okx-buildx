@@ -3,6 +3,7 @@ import { Command } from "commander";
 
 import { briefCommand } from "./commands/brief.js";
 import { dashboardCommand } from "./commands/dashboard.js";
+import { doctorCommand } from "./commands/doctor.js";
 import { reviewCommand } from "./commands/review.js";
 import { assistCommand } from "./commands/assist.js";
 import { auditCommand } from "./commands/audit.js";
@@ -26,6 +27,22 @@ program
   .name("okx-approval-firewall")
   .description("Agent-native approval and allowance firewall for X Layer agents.")
   .version("0.1.0");
+
+program
+  .command("doctor")
+  .description("Run the safest guided approval-health check with one recommended next step.")
+  .option("--policy <policy>", "Policy preset: strict, minimal, trading. Defaults to config or strict.", parsePolicy)
+  .option("--address <address>", "Wallet address. Falls back to the active Agentic Wallet EVM address.")
+  .option("--chain <chain>", "Chain name or chain id to pass through to OnchainOS.")
+  .option("--config <path>", "Optional path to a local policy config JSON file.")
+  .option("--with-brief", "Attempt a model-backed operator brief in the same guided check.")
+  .option("--api-key <key>", "Optional API key override for an OpenAI-compatible chat-completions endpoint.")
+  .option("--base-url <url>", "Optional OpenAI-compatible API base URL.")
+  .option("--model <model>", "Optional model override.")
+  .option("--format <format>", "Output format: pretty or json.", "pretty")
+  .action(async (options) => {
+    await doctorCommand(options);
+  });
 
 program
   .command("dashboard")
