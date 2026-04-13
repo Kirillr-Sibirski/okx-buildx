@@ -15,13 +15,13 @@ export async function auditCommand(options: {
   }
 
   if (!sliced.length) {
-    console.log("PermissionGuard Audit");
+    console.log("OKX Approval Firewall Audit");
     console.log("");
     console.log("No audit entries were found.");
     return;
   }
 
-  console.log("PermissionGuard Audit");
+  console.log("OKX Approval Firewall Audit");
   console.log("");
 
   for (const entry of sliced) {

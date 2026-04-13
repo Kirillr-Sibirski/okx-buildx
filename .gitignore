@@ -6,4 +6,5 @@ dist/
 coverage/
 *.log
 .permission-guard/
-permission-guard.policy.json
+.okx-approval-firewall/
+okx-approval-firewall.policy.json

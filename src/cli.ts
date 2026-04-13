@@ -19,7 +19,7 @@ function parsePolicy(value: string): PolicyPreset {
 }
 
 program
-  .name("permission-guard")
+  .name("okx-approval-firewall")
   .description("Agent-native approval and allowance firewall for X Layer agents.")
   .version("0.1.0");
 
@@ -79,7 +79,7 @@ program
   .option("--address <address>", "Wallet address. Falls back to the active Agentic Wallet EVM address.")
   .option("--config <path>", "Optional path to a local policy config JSON file.")
   .option("--apply", "Actually submit revoke calls through Agentic Wallet.")
-  .option("--artifact-dir <path>", "Directory for execution audit artifacts.", ".permission-guard")
+  .option("--artifact-dir <path>", "Directory for execution audit artifacts.", ".okx-approval-firewall")
   .option("--format <format>", "Output format: pretty or json.", "pretty")
   .action(async (options) => {
     await executeCommand(options);
@@ -88,7 +88,7 @@ program
 program
   .command("audit")
   .description("Review recent local execution artifacts.")
-  .option("--artifact-dir <path>", "Directory for execution audit artifacts.", ".permission-guard")
+  .option("--artifact-dir <path>", "Directory for execution audit artifacts.", ".okx-approval-firewall")
   .option("--limit <n>", "Number of entries to display.", "10")
   .option("--format <format>", "Output format: pretty or json.", "pretty")
   .action(async (options) => {

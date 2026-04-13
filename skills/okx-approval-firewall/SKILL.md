@@ -1,14 +1,14 @@
 ---
-name: permission-guard
+name: okx-approval-firewall
 description: >
   Use this skill to inspect, score, and remediate ERC-20 approvals for an Agentic Wallet.
   Triggers: approval guard, allowance guard, approval firewall, spender budget, revoke approvals,
   exact approval replacement, stale approvals, risky spenders, approval audit.
 ---
 
-# PermissionGuard
+# OKX Approval Firewall
 
-PermissionGuard is a reusable operator skill for X Layer agents.
+OKX Approval Firewall is a reusable operator skill for X Layer agents.
 
 It is designed for agents that need to:
 
@@ -21,11 +21,11 @@ It is designed for agents that need to:
 ## Command Surface
 
 ```bash
-npm run dev -- status --address 0xYourWallet --policy strict --config permission-guard.policy.json
+npm run dev -- status --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json
 npm run dev -- inspect --address 0xYourWallet --chain xlayer
-npm run dev -- plan --address 0xYourWallet --policy strict --config permission-guard.policy.json
-npm run dev -- report --address 0xYourWallet --policy strict --config permission-guard.policy.json --output .permission-guard/report.md
-npm run dev -- execute --address 0xYourWallet --policy strict --config permission-guard.policy.json --apply
+npm run dev -- plan --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json
+npm run dev -- report --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json --output .okx-approval-firewall/report.md
+npm run dev -- execute --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json --apply
 npm run dev -- audit
 ```
 
@@ -48,7 +48,7 @@ Use a local JSON file to define spender-specific rules:
 Example starter file:
 
 ```bash
-cp permission-guard.policy.example.json permission-guard.policy.json
+cp okx-approval-firewall.policy.example.json okx-approval-firewall.policy.json
 ```
 
 ## Intended Demo

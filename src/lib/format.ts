@@ -86,7 +86,7 @@ export function summarizeApprovals(approvals: ApprovalRecord[]): InspectionSumma
 export function formatInspection(approvals: ApprovalRecord[]): string {
   const summary = summarizeApprovals(approvals);
   const lines = [
-    "PermissionGuard Inspection",
+    "OKX Approval Firewall Inspection",
     `Total approvals: ${summary.totalApprovals}`,
     `Unlimited approvals: ${summary.unlimitedApprovals}`,
     `High risk approvals: ${summary.highRiskApprovals}`,
@@ -115,7 +115,7 @@ export function formatInspection(approvals: ApprovalRecord[]): string {
 }
 
 export function formatPlan(decisions: PolicyDecision[]): string {
-  const lines = ["PermissionGuard Plan", ""];
+  const lines = ["OKX Approval Firewall Plan", ""];
 
   if (!decisions.length) {
     lines.push("No policy actions are needed for the selected wallet or chain.", "");
@@ -157,7 +157,7 @@ export function formatMarkdownReport(
   const summary = summarizeApprovals(approvals);
   const health = summarizeHealth(decisions);
   const lines = [
-    "# PermissionGuard Report",
+    "# OKX Approval Firewall Report",
     "",
     `Policy preset: \`${policy}\``,
     "",
@@ -222,7 +222,7 @@ export function formatStatus(params: {
   const health = summarizeHealth(params.decisions);
   const topDecision = params.decisions.find((decision) => decision.action !== "keep");
   const lines = [
-    "PermissionGuard Status",
+    "OKX Approval Firewall Status",
     `Wallet: ${params.address}`,
     `Chain: ${params.chain ?? "all"}`,
     `Policy: ${params.policy}`,

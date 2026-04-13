@@ -1,6 +1,6 @@
-# PermissionGuard
+# OKX Approval Firewall
 
-`PermissionGuard` is an agent-native approval firewall for X Layer wallets.
+`OKX Approval Firewall` is an agent-native approval firewall for X Layer wallets.
 
 It turns raw OKX OnchainOS approval primitives into a reusable operator tool that can:
 
@@ -11,11 +11,11 @@ It turns raw OKX OnchainOS approval primitives into a reusable operator tool tha
 - emit markdown and JSON artifacts for auditability
 - log every live remediation run to a local audit trail
 
-Built for the `OKX Build X Hackathon`, `PermissionGuard` focuses on a real agent pain point: permissions tend to accumulate after execution, but autonomous systems still need safe ways to keep operating.
+Built for the `OKX Build X Hackathon`, `OKX Approval Firewall` focuses on a real agent pain point: permissions tend to accumulate after execution, but autonomous systems still need safe ways to keep operating.
 
 ## Description
 
-PermissionGuard is a CLI and reusable skill for agent operators on X Layer.
+OKX Approval Firewall is a CLI and reusable skill for agent operators on X Layer.
 
 It helps agents and humans answer four practical questions:
 
@@ -28,7 +28,7 @@ It helps agents and humans answer four practical questions:
 
 Most agents can trade, but very few can manage their permissions safely.
 
-PermissionGuard is built for the missing agent-ops layer:
+OKX Approval Firewall is built for the missing agent-ops layer:
 
 - unlimited approvals should not linger after execution
 - trusted spenders still need spend budgets
@@ -39,7 +39,7 @@ This is the core thesis for the OKX Build X Hackathon submission: `agents need a
 
 ## Architecture Overview
 
-PermissionGuard is intentionally simple and operator-first:
+OKX Approval Firewall is intentionally simple and operator-first:
 
 - `OnchainOS security approvals` inventories current ERC-20 approval state
 - `OnchainOS security tx-scan` checks remediation transactions before execution
@@ -90,7 +90,7 @@ Proven transactions:
 
 The successful exact-remediation run wrote a local audit artifact to:
 
-- `.permission-guard/runs/2026-04-12T16-47-55-954Z-execute.json`
+- `.okx-approval-firewall/runs/2026-04-12T16-47-55-954Z-execute.json`
 
 ## Requirements
 
@@ -108,13 +108,13 @@ npm run build
 Use the sample policy file as a starting point:
 
 ```bash
-cp permission-guard.policy.example.json permission-guard.policy.json
+cp okx-approval-firewall.policy.example.json okx-approval-firewall.policy.json
 ```
 
 Check wallet health:
 
 ```bash
-npm run dev -- status --address 0xYourWallet --policy strict --config permission-guard.policy.json
+npm run dev -- status --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json
 ```
 
 Inspect approvals:
@@ -126,25 +126,25 @@ npm run dev -- inspect --address 0xYourWallet --chain xlayer
 Generate a policy plan:
 
 ```bash
-npm run dev -- plan --address 0xYourWallet --policy strict --config permission-guard.policy.json
+npm run dev -- plan --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json
 ```
 
 Write a markdown report artifact:
 
 ```bash
-npm run dev -- report --address 0xYourWallet --policy strict --config permission-guard.policy.json --output .permission-guard/report.md
+npm run dev -- report --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json --output .okx-approval-firewall/report.md
 ```
 
 Preview live cleanup:
 
 ```bash
-npm run dev -- execute --address 0xYourWallet --policy strict --config permission-guard.policy.json
+npm run dev -- execute --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json
 ```
 
 Apply live cleanup and exact remediation:
 
 ```bash
-npm run dev -- execute --address 0xYourWallet --policy strict --config permission-guard.policy.json --apply
+npm run dev -- execute --address 0xYourWallet --policy strict --config okx-approval-firewall.policy.json --apply
 ```
 
 Review recent live runs:
@@ -155,7 +155,7 @@ npm run dev -- audit
 
 ## Policy-As-Code
 
-PermissionGuard supports a local JSON policy file for spender-specific rules.
+OKX Approval Firewall supports a local JSON policy file for spender-specific rules.
 
 Example:
 
@@ -193,8 +193,8 @@ Supported spender controls:
 The repo is intentionally small:
 
 - `README.md`: product overview, setup, and demo story
-- `skills/permission-guard/SKILL.md`: reusable skill wrapper
-- `permission-guard.policy.example.json`: starter policy config
+- `skills/okx-approval-firewall/SKILL.md`: reusable skill wrapper
+- `okx-approval-firewall.policy.example.json`: starter policy config
 - `src/`: CLI commands, policy engine, OKX integration, and audit logging
 
 Key entrypoints:
