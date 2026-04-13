@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OKX Approval Firewall Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">X Layer Agent Ops</p>
+          <h1>Approval Firewall</h1>
+          <p class="lede">
+            Review wallet permissions, preview cleanup safety, and execute approval remediation from one
+            operator surface.
+          </p>
+        </div>
+        <div class="status-cluster">
+          <div class="status-card">
+            <span class="status-label">Model Briefs</span>
+            <strong id="llm-status">Checking...</strong>
+          </div>
+          <div class="status-card">
+            <span class="status-label">Default Policy</span>
+            <strong id="default-policy">strict</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="controls panel">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">Operator Console</p>
+            <h2>Start With A Request</h2>
+          </div>
+          <button id="review-button" class="button button-secondary">Run Review</button>
+        </div>
+
+        <label class="field field-wide">
+          <span>Ask the firewall</span>
+          <textarea
+            id="request-input"
+            rows="3"
+            placeholder="Check my wallet health on X Layer and tell me the safest next step."
+          ></textarea>
+        </label>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>Policy</span>
+            <select id="policy-input">
+              <option value="">Auto (strict default)</option>
+              <option value="strict">strict</option>
+              <option value="minimal">minimal</option>
+              <option value="trading">trading</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Chain</span>
+            <input id="chain-input" value="xlayer" />
+          </label>
+          <label class="field">
+            <span>Wallet (optional)</span>
+            <input id="address-input" placeholder="Uses active Agentic Wallet if empty" />
+          </label>
+          <label class="field">
+            <span>Policy config (optional)</span>
+            <input id="config-input" placeholder="okx-approval-firewall.policy.json" />
+          </label>
+        </div>
+
+        <div class="action-row">
+          <label class="toggle">
+            <input id="with-brief-input" type="checkbox" checked />
+            <span>Try model-backed brief when available</span>
+          </label>
+          <div class="button-row">
+            <button id="assist-button" class="button button-primary">Ask Firewall</button>
+          </div>
+        </div>
+
+        <div id="message-banner" class="banner hidden"></div>
+      </section>
+
+      <main class="dashboard-grid">
+        <section class="panel">
+          <div class="panel-head compact">
+            <div>
+              <p class="section-kicker">Live Review</p>
+              <h2>Wallet Snapshot</h2>
+            </div>
+            <a id="wallet-link" class="ghost-link hidden" target="_blank" rel="noreferrer">Open In Explorer</a>
+          </div>
+          <div id="summary-cards" class="summary-grid"></div>
+          <div class="code-box">
+            <div class="code-box-head">
+              <span>Recommended next command</span>
+              <button id="copy-command-button" class="button button-ghost hidden">Copy</button>
+            </div>
+            <pre id="recommended-command">Run a review to generate the safest next action.</pre>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head compact">
+            <div>
+              <p class="section-kicker">Top Findings</p>
+              <h2>What Needs Attention</h2>
+            </div>
+          </div>
+          <div id="findings-list" class="stack-list empty">No review loaded yet.</div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head compact">
+            <div>
+              <p class="section-kicker">Preflight</p>
+              <h2>Remediation Safety</h2>
+            </div>
+          </div>
+          <div id="preflight-list" class="stack-list empty">Run a review to preview cleanup scans.</div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head compact">
+            <div>
+              <p class="section-kicker">Operator Brief</p>
+              <h2>Model Summary</h2>
+            </div>
+          </div>
+          <div id="brief-output" class="prose-box empty">No brief yet.</div>
+        </section>
+
+        <section class="panel panel-wide">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">Execution</p>
+              <h2>Live Cleanup</h2>
+            </div>
+            <button id="execute-button" class="button button-danger">Execute Live Cleanup</button>
+          </div>
+          <label class="toggle">
+            <input id="execute-confirm-input" type="checkbox" />
+            <span>I understand this will submit transactions through the active Agentic Wallet.</span>
+          </label>
+          <div id="execution-output" class="stack-list empty">
+            Live execution is armed only after a review and explicit confirmation.
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

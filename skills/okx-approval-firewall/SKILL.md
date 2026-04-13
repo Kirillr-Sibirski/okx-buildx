@@ -12,6 +12,7 @@ OKX Approval Firewall is a reusable operator skill for X Layer agents.
 
 It is designed for agents that need to:
 
+- run the firewall from a lightweight local dashboard
 - inspect approval health through natural-language requests
 - run a one-command approval review with top findings, tx-scan preflight, and the safest next step
 - generate model-backed operator briefings from approval state
@@ -24,6 +25,7 @@ It is designed for agents that need to:
 ## Command Surface
 
 ```bash
+npm run dev -- dashboard
 npm run dev -- assist --input "Check my wallet health on X Layer"
 npm run dev -- assist --input "Revoke anything unsafe now" --model gpt-4o-mini
 npm run dev -- review --with-brief
@@ -62,13 +64,14 @@ cp okx-approval-firewall.policy.example.json okx-approval-firewall.policy.json
 ## Intended Demo
 
 1. Run `assist` with a natural-language safety request.
-2. Run `review` to get the highest-signal operator view and dry-run remediation preview in one command.
-3. Run `brief` to create a model-backed operator summary.
-4. Run `status` to show the wallet health summary.
-5. Run `plan` to show why the current approval state is acceptable or risky.
-6. Run `report --output ...` to create a shareable artifact.
-7. Run `execute --apply` to clean up or replace oversized approvals and verify the after-state.
-8. Run `audit` to show the artifact path, verification delta, and resulting tx hashes.
+2. Run `dashboard` to inspect the same review loop in a visual operator surface.
+3. Run `review` to get the highest-signal operator view and dry-run remediation preview in one command.
+4. Run `brief` to create a model-backed operator summary.
+5. Run `status` to show the wallet health summary.
+6. Run `plan` to show why the current approval state is acceptable or risky.
+7. Run `report --output ...` to create a shareable artifact.
+8. Run `execute --apply` to clean up or replace oversized approvals and verify the after-state.
+9. Run `audit` to show the artifact path, verification delta, and resulting tx hashes.
 
 ## Current Scope
 

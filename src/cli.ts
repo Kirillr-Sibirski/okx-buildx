@@ -2,6 +2,7 @@
 import { Command } from "commander";
 
 import { briefCommand } from "./commands/brief.js";
+import { dashboardCommand } from "./commands/dashboard.js";
 import { reviewCommand } from "./commands/review.js";
 import { assistCommand } from "./commands/assist.js";
 import { auditCommand } from "./commands/audit.js";
@@ -25,6 +26,15 @@ program
   .name("okx-approval-firewall")
   .description("Agent-native approval and allowance firewall for X Layer agents.")
   .version("0.1.0");
+
+program
+  .command("dashboard")
+  .description("Launch the local Approval Firewall dashboard.")
+  .option("--host <host>", "Dashboard host.", "127.0.0.1")
+  .option("--port <port>", "Dashboard port.", "4173")
+  .action(async (options) => {
+    await dashboardCommand(options);
+  });
 
 program
   .command("review")
