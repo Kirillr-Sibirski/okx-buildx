@@ -369,6 +369,7 @@ export function formatReview(params: {
     (result) => result.scan.action === "block" || result.replacementScan?.action === "block"
   );
   const findings = params.decisions.filter((decision) => decision.action !== "keep").slice(0, 3);
+  const currentApprovals = params.decisions.slice(0, 5);
   const lines = [
     "onchainos-approval-firewall review",
     `Wallet: ${params.address}`,
@@ -405,6 +406,28 @@ export function formatReview(params: {
       );
       if (finding.replacementAllowance) {
         lines.push(`    Replacement allowance: ${finding.replacementAllowance}`);
+      }
+    }
+  }
+
+  lines.push("", "Current approvals");
+
+  if (!currentApprovals.length) {
+    lines.push("  No approvals found.");
+  } else {
+    for (const decision of currentApprovals) {
+      lines.push(
+        `  ${decision.action} [${decision.severity}] ${decision.approval.tokenSymbol || decision.approval.tokenAddress}`,
+        `    Spender: ${decision.approval.spenderAddress}`,
+        `    Allowance: ${displayAllowance(decision.approval)}`,
+        `    Provider risk: ${decision.approval.riskLevel || "unknown"}`,
+        `    Reason: ${decision.reason}`
+      );
+      if (decision.policyLabel) {
+        lines.push(`    Policy label: ${decision.policyLabel}`);
+      }
+      if (decision.replacementAllowance) {
+        lines.push(`    Replacement allowance: ${decision.replacementAllowance}`);
       }
     }
   }
