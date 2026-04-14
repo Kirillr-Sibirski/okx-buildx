@@ -1,103 +1,53 @@
 # onchainos-approval-firewall
 
-`onchainos-approval-firewall` is the approval safety layer for agent wallets on `X Layer`.
+[![Skills Arena](https://img.shields.io/badge/Build%20X-Skills%20Arena-black)](https://web3.okx.com/vi/xlayer/build-x-hackathon)
+[![Chain](https://img.shields.io/badge/X%20Layer-196-blue)](https://www.okx.com/web3/explorer/xlayer)
+[![License](https://img.shields.io/badge/license-MIT-green)](/Users/kirillrybkov/Desktop/x-layer/LICENSE)
 
-You can think of it as `Revoke.cash for agents`, but built around `OnchainOS`, `Agentic Wallet`, policy-based approval control, preflight security checks, post-run verification, and auditability.
+> Revoke.cash for agents on X Layer.
+> Deterministic approval control for Agentic Wallets via OnchainOS.
 
-It helps agents and operators:
+`onchainos-approval-firewall` is a reusable safety layer for agent wallets on `X Layer`. It inspects token approvals, applies local spender policy, revokes blocked spenders, shrinks oversized allowances to exact budgets, and verifies the result onchain.
 
-- inspect live ERC-20 approvals
-- classify exposure under policy presets or local spender rules
-- preview cleanup safety with `tx-scan`
-- revoke or replace unlimited approvals through Agentic Wallet
-- verify the post-run state and keep an audit trail
+## What It Does
 
-Built for the `OKX Build X Hackathon`, the project focuses on a practical gap in agent operations: agents can trade, route, and pay, but the token approvals that enable those actions often stay open after execution.
+- detect unsafe ERC-20 approvals
+- apply local spender rules: `blocked`, `trusted`, `watchlist`, `budgeted`
+- simulate cleanup with `tx-scan`
+- revoke blocked spenders
+- replace unlimited or oversized approvals with exact allowances
+- leave a local audit trail with tx hashes and verification
 
-Agents constantly create token approvals as they trade, route, and pay onchain, but those permissions often remain open long after execution. `onchainos-approval-firewall` turns approval management into a reusable safety layer for agents on X Layer: detect unsafe approvals, enforce spender policy, revoke blocked spenders, shrink oversized allowances, and verify everything onchain.
-
-## Project Intro
-
-This project is a CLI, local dashboard, and reusable skill for approval hygiene on X Layer.
-
-An agent wants to trade, route, or spend tokens. That requires ERC-20 approvals. Those approvals can be too large, too old, or point at risky spenders. This project checks them, decides what should happen, and can clean them up safely.
-
-Core entrypoints:
-
-- `doctor`: guided first-pass safety check
-- `dashboard`: visual operator surface
-- `assist`: natural-language routing
-- `review`: full approval review with preflight
-- `execute --apply`: live remediation with post-run verification
-
-In normal use, the main loop is just:
+Normal loop:
 
 - `review`
 - `execute --apply`
 - `audit`
 
-## Project Positioning In The X Layer Ecosystem
-
-Most X Layer agent projects focus on action execution. `onchainos-approval-firewall` focuses on the permission layer around those actions.
-
-It is designed for the X Layer ecosystem as:
-
-- a safety wrapper around agent trading and payment flows
-- a way to reduce lingering unlimited approvals
-- a policy layer for trusted, watchlisted, and blocked spenders
-- an auditable cleanup workflow for live agent wallets
-
-Core thesis: `agents need a permission firewall, not just a revoke button`.
-
-## Architecture Overview
-
-Main workflow:
+## How It Works
 
 1. fetch approvals with `OnchainOS security approvals`
-2. decide whether each approval should be kept, reviewed, revoked, or reduced
-3. preflight remediation with `OnchainOS security tx-scan`
-4. execute through `Agentic Wallet`
-5. verify the after-state and write a local audit artifact
-
-## Onchain Identity And Deployment Address
-
-- Primary Agentic Wallet address: `0x5b6a6bc856fba3e3ac9fe4e9368d2aa3090990c8`
-- Target chain: `X Layer`
-- Chain ID: `196`
-- Deployment identity for submission: the Agentic Wallet above performs live remediation
-- Custom deployed contracts: `None in this version`
-
-## OnchainOS / Uniswap Skill Usage
-
-This project is intentionally built around `OnchainOS` and `Agentic Wallet`. It does not need Uniswap integration for the core approval-firewall use case.
-
-OnchainOS modules used:
-
-- `security approvals`
-- `security tx-scan`
-- `wallet balance`
-- `wallet contract-call`
-
-How they are used:
-
-1. resolve the active wallet
-2. inspect current approvals
+2. compare them against local policy
 3. classify each approval as `keep`, `review`, `revoke`, or `replace_with_exact_approval`
-4. scan revoke or exact-approval transactions before execution
-5. execute live cleanup through Agentic Wallet
+4. preflight remediation with `OnchainOS security tx-scan`
+5. execute through the active `Agentic Wallet`
+6. verify the after-state and write an audit artifact
 
-## AI Interactive Experience
+## X Layer Setup
 
-The product includes:
+- Agentic Wallet address: `0x5b6a6bc856fba3e3ac9fe4e9368d2aa3090990c8`
+- Chain: `X Layer`
+- Chain ID: `196`
+- Signing path: `Agentic Wallet` via the real `onchainos` CLI
 
-- `assist` for natural-language routing
-- `doctor` for the safest guided first-run flow
-- `dashboard` for a visual review and execution surface on top of the same shared workflows
+## OnchainOS Usage
 
-Live execution still requires explicit confirmation or `--apply`.
+- `security approvals`: fetch current ERC-20 approvals
+- `security tx-scan`: simulate cleanup before execution
+- `wallet balance`: resolve the active Agentic Wallet
+- `wallet contract-call`: revoke blocked spenders and replace oversized approvals on X Layer
 
-The important point is that this is not the trading agent itself. It is the approval-control layer an agent or operator uses before and after the wallet touches funds.
-The core reasoning is deterministic and local. Optional LLM summaries are not required for normal operation.
+The core reasoning is deterministic and local. This tool is meant to be called by another agent, not to replace the agent.
 
 ## Quickstart
 
@@ -105,83 +55,13 @@ The core reasoning is deterministic and local. Optional LLM summaries are not re
 npm install
 npm run build
 cp onchainos-approval-firewall.policy.example.json onchainos-approval-firewall.policy.json
-```
-
-## Environment Setup
-
-This project can run in two modes:
-
-- `read-only / policy mode`: inspect, review, plan, and report against a wallet address
-- `live execution mode`: use the active `Agentic Wallet` session to submit revokes or exact re-grants
-
-### What goes in `.env`
-
-Use a `.env` file only if you want optional model-backed summaries.
-
-Starter file:
-
-```bash
 cp .env.example .env
-```
-
-Recommended variables:
-
-```bash
-APPROVAL_FIREWALL_LLM_API_KEY=your_openai_or_openai_compatible_api_key
-APPROVAL_FIREWALL_LLM_MODEL=gpt-4o-mini
-# optional
-# APPROVAL_FIREWALL_LLM_BASE_URL=https://api.openai.com/v1
-```
-
-You can also use:
-
-```bash
-OPENAI_API_KEY=your_openai_api_key
-OPENAI_MODEL=gpt-4o-mini
-OPENAI_BASE_URL=https://api.openai.com/v1
-```
-
-Important: the CLI does not auto-load `.env` by itself. Load it into your shell first:
-
-```bash
 set -a
 source .env
 set +a
 ```
 
-### Do we need the wallet private key in `.env`?
-
-No, not for the normal `OnchainOS + Agentic Wallet` flow.
-
-This project is designed to use the active `Agentic Wallet` session through the real `onchainos` CLI. That means:
-
-- you do `not` need to put a private key or mnemonic in `.env`
-- you do `not` need to export the wallet to use the core product
-- live execution works through `onchainos wallet ...` commands once the wallet session is authenticated
-
-What you do need for live execution:
-
-- a working `onchainos` installation
-- an authenticated `Agentic Wallet` session
-- funds on X Layer for gas and any tokens involved in the approval flow
-
-Only use a raw private key if you intentionally build a separate non-Agentic-Wallet signing path. The current project does not require that.
-
-Recommended first commands:
-
-```bash
-npm run dev -- doctor
-npm run dev -- dashboard
-npm run dev -- review
-```
-
-Live cleanup:
-
-```bash
-npm run dev -- execute --policy strict --config onchainos-approval-firewall.policy.json --apply
-```
-
-Minimal day-to-day commands once the wallet session is active and `onchainos-approval-firewall.policy.json` exists in the repo root:
+Minimal usage once the Agentic Wallet session is active:
 
 ```bash
 npm run dev -- review
@@ -189,21 +69,9 @@ npm run dev -- execute --apply
 npm run dev -- audit
 ```
 
-You usually do not need to pass `--address`, `--chain`, `--policy`, or `--config` every time because:
+You usually do not need `--address`, `--chain`, `--policy`, or `--config` because the CLI falls back to the active Agentic Wallet session and the default local config file.
 
-- wallet address falls back to the active Agentic Wallet session
-- chain falls back to the config default
-- policy falls back to the config default
-- config is auto-discovered from `onchainos-approval-firewall.policy.json`
-
-Optional model-backed summary:
-
-```bash
-set -a
-source .env
-set +a
-npm run dev -- brief --policy strict --address 0xYourWallet
-```
+You do not need a private key in `.env` for the normal flow. Live execution uses the active `Agentic Wallet` session through the real `onchainos` CLI.
 
 Verification:
 
@@ -211,33 +79,39 @@ Verification:
 npm run ci
 ```
 
-## Agent Loop Example
+## Policy File
 
-This tool is meant to be called by another agent, not to replace the agent.
+`onchainos-approval-firewall.policy.json` defines local spender rules:
+
+- `blocked`: always revoke
+- `trusted`: allowed, but can still be budgeted
+- `exactAllowance`: replace unlimited approvals with this exact amount
+- `maxAllowance`: reduce oversized finite approvals
+- `watchlist`: keep visible for manual review
+
+## Agent Loop
 
 Example:
 
-1. an execution agent is about to swap or route funds on X Layer
+1. an execution agent is about to trade, route, or pay on X Layer
 2. before the action, it runs:
 
 ```bash
 npm run dev -- review --format json
 ```
 
-3. it reads the result:
-   - if the output contains only `keep`, it continues with its main job
-   - if the output contains `revoke` or `replace_with_exact_approval`, it runs:
+3. if the output contains `revoke` or `replace_with_exact_approval`, it runs:
 
 ```bash
 npm run dev -- execute --apply --format json
 ```
 
-4. after execution, it reads:
-   - transaction hashes
+4. it reads:
+   - tx hashes
    - post-run verification
-   - remaining cleanup count
+   - remaining actionable approvals
 
-5. then it continues with its original task on X Layer
+5. then it continues with its original task
 
 So the agent is using:
 
@@ -255,9 +129,3 @@ Verified transactions:
 - revoke unlimited approval: `0x1e02d66dd26b2a85305e91771cd261e314e80c5407c507a745d91fbcba586d33`
 - cleanup leg of exact remediation: `0x4d32af6447c64bb6fc8cda31a2779a6f3912a7450401e7ff17c9281c18968fb4`
 - exact regrant leg of exact remediation: `0x8e675c89d98ecf38ebe5525514c60d513d4cd173f569652b85919326c7d445cf`
-
-## Team Members
-
-Required for submission:
-
-- Solo submission by `Kirill Sibirski`, with help from `OpenAI Codex`
