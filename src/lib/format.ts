@@ -20,6 +20,60 @@ function labeled(label: string, value: string): string {
   return `${label.padEnd(18)} ${value}`;
 }
 
+function wrapText(text: string, width: number): string[] {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (!normalized) {
+    return [""];
+  }
+
+  const words = normalized.split(" ");
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    if (!current) {
+      current = word;
+      continue;
+    }
+
+    if (`${current} ${word}`.length <= width) {
+      current = `${current} ${word}`;
+      continue;
+    }
+
+    lines.push(current);
+    current = word;
+  }
+
+  if (current) {
+    lines.push(current);
+  }
+
+  return lines;
+}
+
+function formatAsciiCard(titleText: string, rows: Array<[string, string]>): string[] {
+  const labelWidth = 13;
+  const valueWidth = 58;
+  const innerWidth = labelWidth + 3 + valueWidth;
+  const top = `+${"-".repeat(innerWidth + 2)}+`;
+  const titleLine = `| ${titleText.padEnd(innerWidth)} |`;
+  const divider = `+${"-".repeat(labelWidth + 2)}+${"-".repeat(valueWidth + 2)}+`;
+  const lines = [top, titleLine, divider];
+
+  for (const [label, rawValue] of rows) {
+    const wrapped = wrapText(rawValue, valueWidth);
+    wrapped.forEach((line, index) => {
+      lines.push(
+        `| ${(index === 0 ? label : "").padEnd(labelWidth)} | ${line.padEnd(valueWidth)} |`
+      );
+    });
+  }
+
+  lines.push(top);
+  return lines;
+}
+
 function displayAllowance(approval: ApprovalRecord): string {
   return approval.isUnlimited ? "unlimited" : approval.allowance;
 }
@@ -381,27 +435,16 @@ export function formatReview(params: {
 }): string {
   const summary = summarizeApprovals(params.approvals);
   const health = summarizeHealth(params.decisions);
-  const hasBlockedPreflight = params.preflight?.some(
-    (result) => result.scan.action === "block" || result.replacementScan?.action === "block"
-  );
-  const findings = params.decisions.filter((decision) => decision.action !== "keep").slice(0, 3);
+  const counts = summarizeActionCounts(params.decisions);
   const currentApprovals = params.decisions.slice(0, 5);
   const lines = [
     title("onchainos-approval-firewall review"),
     "",
-    ...section("Summary"),
     labeled("Wallet", params.address),
     labeled("Chain", params.chain ?? "all"),
     labeled("Policy", params.policy),
-    labeled("Risk grade", health.grade),
-    labeled("Headline", health.headline),
-    labeled("Approvals", `${summary.totalApprovals} total | ${summary.unlimitedApprovals} unlimited | ${summary.highRiskApprovals} high risk`),
-    labeled(
-      "Next action",
-      hasBlockedPreflight
-        ? "One or more remediation paths are blocked by tx-scan. Review the report before live execution."
-        : health.nextAction
-    )
+    labeled("Status", `${health.grade} | ${summary.totalApprovals} approvals | ${counts.actionableCount} actionable`),
+    labeled("Headline", health.headline)
   ];
 
   const walletExplorerUrl = buildWalletExplorerUrl(params.address, params.chain);
@@ -412,42 +455,31 @@ export function formatReview(params: {
     lines.push(`Policy config: ${params.configPath}`);
   }
 
-  lines.push("", ...section("Top findings"));
-
-  if (!findings.length) {
-    lines.push("  No actions beyond keep are currently required.");
-  } else {
-    for (const finding of findings) {
-      lines.push(
-        `${finding.action.toUpperCase()} [${finding.severity}] ${finding.approval.tokenSymbol || finding.approval.tokenAddress}`,
-        labeled("Spender", finding.approval.spenderAddress),
-        labeled("Reason", finding.reason)
-      );
-      if (finding.replacementAllowance) {
-        lines.push(labeled("Replacement", finding.replacementAllowance));
-      }
-    }
-  }
-
   lines.push("", ...section("Current approvals"));
 
   if (!currentApprovals.length) {
-    lines.push("  No approvals found.");
+    lines.push("No approvals found.");
   } else {
     for (const decision of currentApprovals) {
-      lines.push(
-        `${decision.action.toUpperCase()} [${decision.severity}] ${decision.approval.tokenSymbol || decision.approval.tokenAddress}`,
-        labeled("Spender", decision.approval.spenderAddress),
-        labeled("Allowance", displayAllowance(decision.approval)),
-        labeled("Provider risk", decision.approval.riskLevel || "unknown"),
-        labeled("Reason", decision.reason)
-      );
+      const rows: Array<[string, string]> = [
+        ["Spender", decision.approval.spenderAddress],
+        ["Allowance", displayAllowance(decision.approval)],
+        ["Provider risk", decision.approval.riskLevel || "unknown"],
+        ["Reason", decision.reason]
+      ];
       if (decision.policyLabel) {
-        lines.push(labeled("Policy label", decision.policyLabel));
+        rows.push(["Policy label", decision.policyLabel]);
       }
       if (decision.replacementAllowance) {
-        lines.push(labeled("Replacement", decision.replacementAllowance));
+        rows.push(["Replacement", decision.replacementAllowance]);
       }
+      lines.push(
+        ...formatAsciiCard(
+          `${decision.action.toUpperCase()} [${decision.severity}] ${decision.approval.tokenSymbol || decision.approval.tokenAddress}`,
+          rows
+        ),
+        ""
+      );
     }
   }
 
@@ -479,8 +511,6 @@ export function formatReview(params: {
       }
     }
   }
-
-  lines.push("", ...section("Recommended command"), params.recommendedCommand);
 
   if (params.brief) {
     lines.push("", "Operator brief", params.brief);
