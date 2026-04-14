@@ -22,6 +22,12 @@ It is designed for agents that need to:
 - export human-readable reports and machine-readable artifacts
 - keep an audit trail of live cleanup runs
 
+In normal operation, the core loop is:
+
+- `review`
+- `execute --apply`
+- `audit`
+
 ## Command Surface
 
 ```bash
@@ -35,6 +41,14 @@ npm run dev -- inspect --address 0xYourWallet --chain xlayer
 npm run dev -- plan --address 0xYourWallet --policy strict --config onchainos-approval-firewall.policy.json
 npm run dev -- report --address 0xYourWallet --policy strict --config onchainos-approval-firewall.policy.json --output .onchainos-approval-firewall/report.md
 npm run dev -- execute --address 0xYourWallet --policy strict --config onchainos-approval-firewall.policy.json --apply
+npm run dev -- audit
+```
+
+Minimal commands once the wallet session is active and the default config file exists:
+
+```bash
+npm run dev -- review
+npm run dev -- execute --apply
 npm run dev -- audit
 ```
 
@@ -59,6 +73,13 @@ Example starter file:
 ```bash
 cp onchainos-approval-firewall.policy.example.json onchainos-approval-firewall.policy.json
 ```
+
+What the policy file means in plain English:
+
+- `blocked`: this spender should always be revoked
+- `trusted`: this spender is allowed, but can still be capped
+- `exactAllowance`: if the spender currently has an unlimited approval, replace it with this exact budget
+- `maxAllowance`: if the spender has too much allowance, shrink it
 
 ## Environment Notes
 
@@ -102,3 +123,15 @@ This skill uses the active `Agentic Wallet` session through the real `onchainos`
 - tx-scan preflight before live remediation
 - post-run verification after live remediation
 - exact-allowance remediation when the policy file defines a budget
+
+## How Another Agent Uses This Skill
+
+Typical pattern:
+
+1. before an onchain action on X Layer, call `review --format json`
+2. if the output contains `revoke` or `replace_with_exact_approval`, call `execute --apply --format json`
+3. read the tx hashes and verification output
+4. continue with the original trade, payment, or routing task
+
+So the calling agent does not guess about wallet permissions itself.
+It delegates that decision to this deterministic approval firewall.

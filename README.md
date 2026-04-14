@@ -28,6 +28,12 @@ Core entrypoints:
 - `review`: full approval review with preflight
 - `execute --apply`: live remediation with post-run verification
 
+In normal use, the main loop is just:
+
+- `review`
+- `execute --apply`
+- `audit`
+
 ## Project Positioning In The X Layer Ecosystem
 
 Most X Layer agent projects focus on action execution. `onchainos-approval-firewall` focuses on the permission layer around those actions.
@@ -173,6 +179,21 @@ Live cleanup:
 npm run dev -- execute --policy strict --config onchainos-approval-firewall.policy.json --apply
 ```
 
+Minimal day-to-day commands once the wallet session is active and `onchainos-approval-firewall.policy.json` exists in the repo root:
+
+```bash
+npm run dev -- review
+npm run dev -- execute --apply
+npm run dev -- audit
+```
+
+You usually do not need to pass `--address`, `--chain`, `--policy`, or `--config` every time because:
+
+- wallet address falls back to the active Agentic Wallet session
+- chain falls back to the config default
+- policy falls back to the config default
+- config is auto-discovered from `onchainos-approval-firewall.policy.json`
+
 Optional model-backed summary:
 
 ```bash
@@ -187,6 +208,40 @@ Verification:
 ```bash
 npm run ci
 ```
+
+## Agent Loop Example
+
+This tool is meant to be called by another agent, not to replace the agent.
+
+Example:
+
+1. an execution agent is about to swap or route funds on X Layer
+2. before the action, it runs:
+
+```bash
+npm run dev -- review --format json
+```
+
+3. it reads the result:
+   - if the output contains only `keep`, it continues with its main job
+   - if the output contains `revoke` or `replace_with_exact_approval`, it runs:
+
+```bash
+npm run dev -- execute --apply --format json
+```
+
+4. after execution, it reads:
+   - transaction hashes
+   - post-run verification
+   - remaining cleanup count
+
+5. then it continues with its original task on X Layer
+
+So the agent is using:
+
+- `OnchainOS` to inspect approvals, simulate cleanup, and submit transactions
+- the `Agentic Wallet` to sign and execute on X Layer
+- `onchainos-approval-firewall` as a deterministic permission-control layer around those actions
 
 ## Live Proof
 
