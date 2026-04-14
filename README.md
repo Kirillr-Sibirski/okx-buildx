@@ -14,6 +14,8 @@ It helps agents and operators:
 
 Built for the `OKX Build X Hackathon`, the project focuses on a practical gap in agent operations: agents can trade, route, and pay, but the token approvals that enable those actions often stay open after execution.
 
+Agents constantly create token approvals as they trade, route, and pay onchain, but those permissions often remain open long after execution. `onchainos-approval-firewall` turns approval management into a reusable safety layer for agents on X Layer: detect unsafe approvals, enforce spender policy, revoke blocked spenders, shrink oversized allowances, and verify everything onchain.
+
 ## Project Intro
 
 This project is a CLI, local dashboard, and reusable skill for approval hygiene on X Layer.
